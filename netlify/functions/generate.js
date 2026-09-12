@@ -1,6 +1,6 @@
-import { GoogleGenAI } from '@google/genai';
+const { GoogleGenAI } = require('@google/genai');
 
-export default async function handler(event, context) {
+exports.handler = async function(event, context) {
     // Vérifie que la méthode est bien POST
     if (event.httpMethod !== 'POST') {
         return { 
@@ -56,7 +56,7 @@ Informations commerciales à inclure fidèlement si elles sont présentes (n'inv
 ${commercialInfo}
         `.trim();
 
-        // Appel de l'API Google GenAI avec ton modèle et ta clé d'environnement Netlify
+        // Appel de l'API Google GenAI avec ta clé d'environnement Netlify
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const aiResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
@@ -78,4 +78,4 @@ ${commercialInfo}
             body: JSON.stringify({ error: err.message || 'Erreur interne du serveur.' }) 
         };
     }
-}
+};
