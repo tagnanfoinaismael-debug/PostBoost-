@@ -4,21 +4,37 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    const { product, platform, tone, lang } = JSON.parse(event.body);
+    // Récupération des nouveaux champs optionnels envoyés par le formulaire
+    const { product, platform, tone, lang, price, oldPrice, promo, delivery, location, link, contact } = JSON.parse(event.body);
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       return { statusCode: 500, body: JSON.stringify({ error: 'Clé API Gemini non configurée sur Netlify.' }) };
     }
 
-    // Prompt strict interdisant l'invention de faits non fournis
-    const prompt = `Tu es un expert en copy-writing et en marketing digital. Rédige une publication pour ${platform} avec un ton ${tone} concernant ce produit/sujet : "${product}". La langue de la réponse doit être ${lang}.
+    // Construction dynamique du bloc d'informations commerciales facultatives fournies
+    let commercialDetails = "";
+    if (price) commercialDetails += `- Prix : ${price}\n`;
+    if (oldPrice) commercialDetails += `- Ancien prix : ${oldPrice}\n`;
+    if (promo) commercialDetails += `- Réduction : ${promo}\n`;
+    if (delivery) commercialDetails += `- Livraison : ${delivery}\n`;
+    if (location) commercialDetails += `- Localisation : ${location}\n`;
+    if (link) commercialDetails += `- Lien : ${link}\n`;
+    if (contact) commercialDetails += `- Contact : ${contact}\n`;
 
-    RÈGLES STRICTES DE FIABILITÉ :
+    // Prompt strict axé sur l'utilisation exclusive des données fournies et la variété des structures
+    const prompt = `Tu es un expert en copy-writing et en marketing digital. Rédige une publication commerciale pour ${platform} avec un ton ${tone}. 
+    
+    Produit ou sujet de base : "${product}"
+    
+    INFORMATIONS COMMERCIALES FOURNIES PAR L'UTILISATEUR (utilise UNIQUEMENT celles-ci si elles sont présentes, n'en invente aucune autre) :
+    ${commercialDetails || "Aucune information commerciale spécifique fournie (reste neutre et focalise-toi sur le produit de base sans inventer de chiffres)."}
+
+    RÈGLES ABSOLUES DE FIABILITÉ ET DE STYLE :
     1. Utilise un encodage de texte propre (UTF-8) sans caractères corrompus.
-    2. N'invente JAMAIS de prix, de réductions, de statistiques, de nombres d'avis, de volumes de ventes, de stocks, de pointures spécifiques ou de délais de livraison qui n'ont pas été explicitement fournis par l'utilisateur dans le sujet/produit.
-    3. Si une information factuelle manque (comme une promo ou un stock), utilise une formulation générique (ex: "Découvre notre collection" au lieu de "-20%") ou des emplacements à compléter (ex: "[Indique ton prix ici]").
-    4. VARIE LA STRUCTURE À CHAQUE FOIS (storytelling, accroche choc, format minimaliste, humour ou urgence modérée) sans toujours utiliser le même schéma classique.`;
+    2. INTERDICTION FORMELLE d'inventer des prix, réductions, avis clients, volumes de ventes, stocks, pointures, délais de livraison ou caractéristiques techniques (comme l'autonomie, la qualité audio ou le maintien) si l'utilisateur ne les a pas fournis.
+    3. Si une information n'est pas fournie, ne l'invente pas. Fais simple ou utilise des formulations générales.
+    4. VARIE LA STRUCTURE À CHAQUE FOIS : alterne entre storytelling, accroche choc, format minimaliste, humour ou urgence, sans garder le même schéma répétitif. La langue de la réponse doit être ${lang}.`;
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
