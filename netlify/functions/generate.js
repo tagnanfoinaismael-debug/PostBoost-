@@ -1,7 +1,6 @@
-const { GoogleGenAI } = require('@google/genai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 exports.handler = async function(event, context) {
-    // Vérifie que la méthode est bien POST
     if (event.httpMethod !== 'POST') {
         return { 
             statusCode: 405, 
@@ -10,7 +9,6 @@ exports.handler = async function(event, context) {
     }
 
     try {
-        // Récupération des données envoyées par ton formulaire frontend
         const body = JSON.parse(event.body || '{}');
         const { 
             product, 
@@ -34,7 +32,6 @@ exports.handler = async function(event, context) {
             };
         }
 
-        // Construction des informations commerciales optionnelles pour l'IA
         let commercialInfo = '';
         if (price) commercialInfo += `- Prix : ${price}\n`;
         if (oldPrice) commercialInfo += `- Ancien prix : ${oldPrice}\n`;
@@ -44,7 +41,6 @@ exports.handler = async function(event, context) {
         if (contact) commercialInfo += `- Contact / WhatsApp : ${contact}\n`;
         if (link) commercialInfo += `- Lien : ${link}\n`;
 
-        // Création du prompt ultra-précis pour l'IA
         const promptText = `
 Rédige une publication ultra-percutante et adaptée pour le réseau social ${platform}.
 Sujet / Produit : ${product}
@@ -56,16 +52,14 @@ Informations commerciales à inclure fidèlement si elles sont présentes (n'inv
 ${commercialInfo}
         `.trim();
 
-        // Appel de l'API Google GenAI avec ta clé d'environnement Netlify
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const aiResponse = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: promptText,
-        });
+        // Initialisation avec le SDK officiel correct
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-        const generatedPost = aiResponse.text || '';
+        const result = await model.generateContent(promptText);
+        const response = await result.response;
+        const generatedPost = response.text() || '';
 
-        // Renvoie le texte généré au format attendu par ton index.html ({ text: ... })
         return {
             statusCode: 200,
             body: JSON.stringify({ text: generatedPost })
