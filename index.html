@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>PostBoost AI - V1 Gratuite</title>
+ <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+ <style>
+   * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+   body { background-color: #0f172a; color: #f8fafc; margin: 0; padding: 15px; display: flex; justify-content: center; }
+   .container { max-width: 600px; width: 100%; background: #1e293b; padding: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); margin-bottom: 20px; }
+   
+   .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+   .lang-select { width: auto; padding: 6px 12px; background: #0f172a; color: #38bdf8; border: 1px solid #38bdf8; border-radius: 6px; font-weight: bold; font-size: 0.9em; }
+   
+   /* Navigation du haut optimisée pour mobile */
+   .nav-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: #0f172a; padding: 4px; border-radius: 10px; border: 1px solid #334155; }
+   .nav-tab { flex: 1; padding: 8px 4px; text-align: center; background: transparent; border: none; color: #94a3b8; font-size: 0.78em; font-weight: bold; cursor: pointer; border-radius: 6px; transition: 0.2s; white-space: nowrap; }
+   .nav-tab.active { background: #38bdf8; color: #0f172a; }
+
+   .section-view { display: none; }
+   .section-view.active { display: block; }
+
+   h1 { text-align: center; color: #38bdf8; margin-top: 0; font-size: 1.6em; }
+   p.subtitle { text-align: center; color: #94a3b8; font-size: 0.9em; margin-bottom: 20px; line-height: 1.4; }
+   
+   .stats-bar { display: flex; justify-content: space-between; background: #0f172a; padding: 12px 18px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px; font-size: 0.9em; }
+   .stats-bar span strong { color: #38bdf8; }
+
+   label { display: block; margin-top: 15px; font-weight: 600; color: #cbd5e1; font-size: 0.9em; }
+   input, select { width: 100%; padding: 12px; margin-top: 6px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 1em; }
+   
+   button.btn-primary { width: 100%; padding: 14px; margin-top: 20px; background: linear-gradient(135deg, #38bdf8, #818cf8); border: none; border-radius: 8px; color: #fff; font-size: 1.05em; font-weight: bold; cursor: pointer; transition: 0.3s; }
+   button.btn-primary:active { transform: scale(0.98); }
+   
+   .result-wrapper { margin-top: 25px; }
+   .result-box { padding: 20px; background: #0f172a; border-radius: 8px; border: 1px solid #38bdf8; line-height: 1.6; font-size: 0.95em; color: #e2e8f0; }
+   .result-box h3 { color: #38bdf8; margin-top: 15px; margin-bottom: 8px; border-bottom: 1px solid #334155; padding-bottom: 4px; }
+   
+   button.btn-copy { width: 100%; padding: 12px; margin-top: 12px; background: #334155; border: 1px solid #475569; border-radius: 8px; color: #38bdf8; font-weight: bold; cursor: pointer; font-size: 1em; }
+   .spinner { display: none; text-align: center; margin-top: 20px; color: #38bdf8; font-weight: bold; }
+
+   .card-box { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 15px; }
+   .card-box h3 { margin-top: 0; color: #38bdf8; font-size: 1.05em; }
+   .mission-item { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 10px 14px; border-radius: 8px; margin-top: 8px; border: 1px solid #334155; font-size: 0.9em; }
+   .mission-btn { background: #38bdf8; color: #0f172a; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 0.8em; }
+ </style>
+</head>
+<body>
+
+<div class="container">
+ <div class="header-bar">
+   <span style="font-size: 1.1em; font-weight: bold; color: #38bdf8;">⚡ PostBoost AI</span>
+   <select id="langSelect" class="lang-select" onchange="changeLanguage()">
+     <option value="fr">🇫🇷 FR</option>
+     <option value="en">🇬🇧 EN</option>
+     <option value="es">🇪🇸 ES</option>
+     <option value="zh">🇨🇳 中文</option>
+   </select>
+ </div>
+
+ <!-- Navigation V1 -->
+ <div class="nav-tabs">
+   <button class="nav-tab active" onclick="switchTab('create', this)" id="tab-create">✍️ Créer</button>
+   <button class="nav-tab" onclick="switchTab('boost', this)" id="tab-boost">🚀 Booster</button>
+   <button class="nav-tab" onclick="switchTab('earn', this)" id="tab-earn">🎁 Crédits</button>
+   <button class="nav-tab" onclick="switchTab('account', this)" id="tab-account">👤 Compte</button>
+ </div>
+
+ <!-- ONGLET 1 : CRÉER -->
+ <div id="view-create" class="section-view active">
+   <h1 id="ui-title">🚀 PostBoost AI</h1>
+   <p class="subtitle" id="ui-subtitle">Crée du contenu qui attire l’attention en quelques secondes.</p>
+
+   <div class="stats-bar">
+     <span>🎁 <strong id="credits-display">100</strong> <span id="ui-credits-text">Crédits dispo</span></span>
+     <span>🔥 <span id="ui-status-text">Gratuit (V1 Test)</span></span>
+   </div>
+
+   <label for="product" id="ui-label-product">Produit ou sujet de la publication :</label>
+   <input type="text" id="product" placeholder="Ex: AirPods Pro, vêtements, conseils révisions...">
+
+   <label for="platform" id="ui-label-platform">Réseau social ciblé :</label>
+   <select id="platform">
+     <option value="TikTok">TikTok</option>
+     <option value="Instagram">Instagram</option>
+     <option value="Facebook">Facebook</option>
+     <option value="LinkedIn">LinkedIn</option>
+     <option value="X / Twitter">X / Twitter</option>
+     <option value="YouTube Shorts">YouTube Shorts</option>
+     <option value="Pinterest">Pinterest</option>
+   </select>
+
+   <label for="tone" id="ui-label-tone">Ton souhaité :</label>
+   <select id="tone">
+     <option value="Vendeur et dynamique" id="opt-t1">Vendeur & Dynamique</option>
+     <option value="Inspirant et engageant" id="opt-t2">Inspirant & Engageant</option>
+     <option value="Drôle et décalé" id="opt-t3">Drôle & Décalé</option>
+     <option value="Professionnel et expert" id="opt-t4">Professionnel & Expert</option>
+     <option value="Éducatif et instructif" id="opt-t5">Éducatif & Instructif</option>
+     <option value="Storytelling et émotionnel" id="opt-t6">Storytelling & Émotionnel</option>
+   </select>
+
+   <button class="btn-primary" id="ui-btn-submit" onclick="generateContent()">✍️ Créer mon contenu (5 crédits)</button>
+
+   <div class="spinner" id="spinner">Création du contenu par l'IA en cours...</div>
+   
+   <div class="result-wrapper" id="resultWrapper" style="display:none;">
+     <div class="result-box" id="resultBox"></div>
+     <button class="btn-copy" id="ui-btn-copy" onclick="copyToClipboard()">📋 Copier le texte</button>
+   </div>
+ </div>
+
+ <!-- ONGLET 2 : BOOSTER -->
+ <div id="view-boost" class="section-view">
+   <h2 style="color: #38bdf8; text-align: center; font-size: 1.4em;" id="ui-boost-title">🚀 Booster ma publication</h2>
+   <p class="subtitle" id="ui-boost-sub">Diffusez vos contenus auprès d'une audience plus large.</p>
+   
+   <div class="card-box" style="text-align: center; padding: 25px;">
+     <p style="font-size: 1.1em; color: #f8fafc; font-weight: bold;" id="ui-boost-soon">🚧 Bientôt disponible</p>
+     <p style="color: #94a3b8; font-size: 0.9em; margin-bottom: 20px;" id="ui-boost-desc">Cette fonctionnalité de ciblage publicitaire automatisé arrivera dans la prochaine mise à jour de PostBoost AI.</p>
+     <button class="btn-primary" style="margin-top: 0; padding: 12px; font-size: 0.95em; background: linear-gradient(135deg, #10b981, #059669);" onclick="notifyMe()" id="ui-notify-btn">🔔 Être informé du lancement</button>
+   </div>
+ </div>
+
+ <!-- ONGLET 3 : GAGNER DES CRÉDITS -->
+ <div id="view-earn" class="section-view">
+   <h2 style="color: #38bdf8; text-align: center; font-size: 1.4em;" id="ui-earn-title">🎁 Gagner des crédits</h2>
+   <p class="subtitle" id="ui-earn-sub">Utilisez vos crédits pour générer vos contenus et en gagner plus facilement.</p>
+   
+   <div class="card-box">
+     <h3 id="ui-ref-title">👥 Programme de Parrainage</h3>
+     <p style="color: #94a3b8; font-size: 0.9em;" id="ui-ref-desc">Invite un ami et gagne 150 crédits. Ton ami reçoit aussi 150 crédits à l'inscription !</p>
+     <button class="btn-primary" style="margin-top: 10px; padding: 10px; font-size: 0.9em;" onclick="shareRef()" id="ui-ref-btn">🔗 Partager mon lien unique</button>
+   </div>
+
+   <div class="card-box">
+     <h3 id="ui-mission-title">🎯 Missions Quotidiennes</h3>
+     <div class="mission-item">
+       <span id="ui-m1">Génère 3 posts aujourd'hui → <strong>+50 crédits</strong></span>
+       <button class="mission-btn" onclick="claimMission(50, this)" id="ui-m-btn1">Réclamer</button>
+     </div>
+     <div class="mission-item" style="margin-top: 10px;">
+       <span id="ui-m2">Connecte-toi 7 jours de suite → <strong>+300 crédits</strong></span>
+       <button class="mission-btn" onclick="claimMission(300, this)" id="ui-m-btn2">Réclamer</button>
+     </div>
+   </div>
+ </div>
+
+ <!-- ONGLET 4 : MON COMPTE -->
+ <div id="view-account" class="section-view">
+   <h2 style="color: #38bdf8; text-align: center; font-size: 1.4em;" id="ui-acc-title">👤 Mon compte</h2>
+   <p class="subtitle" id="ui-acc-sub">Suivez votre solde et l'historique de votre profil.</p>
+   
+   <div class="card-box">
+     <p>📊 <strong id="acc-credits-label">Solde actuel :</strong> <span id="acc-credits-val" style="color: #38bdf8; font-weight: bold;">100</span> crédits</p>
+     <p>📱 <strong id="acc-status-label">Statut du compte :</strong> <span style="color: #10b981;">Actif (Version Gratuite V1)</span></p>
+     <p>🛡️ <strong id="acc-key-label">Sécurité API :</strong> <span style="color: #10b981;">Intégrée en arrière-plan</span></p>
+   </div>
+ </div>
+
+</div>
+
+<script>
+// La clé Gemini est conservée uniquement sur le serveur.
+
+
+// Récupération sécurisée du localStorage (anti-NaN)
+let savedCredits = Number(localStorage.getItem('postboost_credits'));
+let userCredits = Number.isFinite(savedCredits) && savedCredits >= 0 ? savedCredits : 100;
+localStorage.setItem('postboost_credits', userCredits);
+
+document.getElementById('credits-display').innerText = userCredits;
+document.getElementById('acc-credits-val').innerText = userCredits;
+
+const translations = {
+ fr: {
+   tabCreate: "✍️ Créer", tabBoost: "🚀 Booster", tabEarn: "🎁 Crédits", tabAccount: "👤 Compte",
+   title: "🚀 PostBoost AI",
+   subtitle: "Crée du contenu qui attire l’attention en quelques secondes.",
+   creditsText: "Crédits dispo", statusText: "Gratuit (V1 Test)",
+   labelProduct: "Produit ou sujet de la publication :",
+   placeholderProduct: "Ex: AirPods Pro, vêtements, conseils révisions...",
+   labelPlatform: "Réseau social ciblé :",
+   labelTone: "Ton souhaité :",
+   btnSubmit: "✍️ Créer mon contenu (5 crédits)",
+   btnCopy: "📋 Copier le texte",
+   spinner: "Création du contenu par l'IA en cours...",
+   alertInput: "Veuillez entrer un produit ou sujet !",
+   alertCopied: "Texte copié dans le presse-papier !",
+   alertNoCredits: "Crédits insuffisants (5 crédits requis) ! Rendez-vous dans l'onglet Crédits pour en gagner.",
+   boostTitle: "🚀 Booster ma publication",
+   boostSub: "Diffusez vos contenus auprès d'une audience plus large.",
+   boostSoon: "🚧 Bientôt disponible",
+   boostDesc: "Cette fonctionnalité de ciblage publicitaire automatisé arrivera dans la prochaine mise à jour de PostBoost AI.",
+   notifyBtn: "🔔 Être informé du lancement",
+   notifyAlert: "C'est noté ! Vous serez prévenu dès que le Boost sera disponible.",
+   earnTitle: "🎁 Gagner des crédits",
+   earnSub: "Utilisez vos crédits pour générer vos contenus et en gagner plus facilement.",
+   refTitle: "👥 Programme de Parrainage",
+   refDesc: "Invite un ami et gagne 150 crédits. Ton ami reçoit aussi 150 crédits à l'inscription !",
+   refBtn: "🔗 Partager mon lien unique",
+   missionTitle: "🎯 Missions Quotidiennes",
+   m1: "Génère 3 posts aujourd'hui → <strong>+50 crédits</strong>",
+   m2: "Connecte-toi 7 jours de suite → <strong>+300 crédits</strong>",
+   mBtn: "Réclamer",
+   accTitle: "👤 Mon compte",
+   accSub: "Suivez votre solde et l'historique de votre profil.",
+   accCreditsLabel: "Solde actuel :",
+   accStatusLabel: "Statut du compte :",
+   accKeyLabel: "Sécurité API :",
+   tones: ["Vendeur & Dynamique", "Inspirant & Engageant", "Drôle & Décalé", "Professionnel & Expert", "Éducatif & Instructif", "Storytelling & Émotionnel"]
+ },
+ en: {
+   tabCreate: "✍️ Create", tabBoost: "🚀 Boost", tabEarn: "🎁 Credits", tabAccount: "👤 Account",
+   title: "🚀 PostBoost AI",
+   subtitle: "Create content that grabs attention in seconds.",
+   creditsText: "Credits left", statusText: "Free (V1 Test)",
+   labelProduct: "Product or post topic:",
+   placeholderProduct: "Ex: AirPods Pro, clothing, study tips...",
+   labelPlatform: "Target Social Media:",
+   labelTone: "Desired Tone:",
+   btnSubmit: "✍️ Create my content (5 credits)",
+   btnCopy: "📋 Copy Text",
+   spinner: "AI Content Generation in progress...",
+   alertInput: "Please enter a product or topic!",
+   alertCopied: "Text copied to clipboard!",
+   alertNoCredits: "Not enough credits (5 credits required)! Check the Credits tab to earn more.",
+   boostTitle: "🚀 Boost my post",
+   boostSub: "Reach a wider audience with your content.",
+   boostSoon: "🚧 Coming Soon",
+   boostDesc: "This automated advertising feature will arrive in the next update of PostBoost AI.",
+   notifyBtn: "🔔 Notify me at launch",
+   notifyAlert: "Noted! You will be notified as soon as Boost is available.",
+   earnTitle: "🎁 Earn Credits",
+   earnSub: "Use your credits to generate content and earn more easily.",
+   refTitle: "👥 Referral Program",
+   refDesc: "Invite a friend and earn 150 credits. Your friend also gets 150 credits upon signup!",
+   refBtn: "🔗 Share my unique link",
+   missionTitle: "🎯 Daily Missions",
+   m1: "Generate 3 posts today → <strong>+50 credits</strong>",
+   m2: "Log in 7 days in a row → <strong>+300 credits</strong>",
+   mBtn: "Claim",
+   accTitle: "👤 My Account",
+   accSub: "Track your balance and profile history.",
+   accCreditsLabel: "Current balance:",
+   accStatusLabel: "Account status:",
+   accKeyLabel: "API Security:",
+   tones: ["Sales & Dynamic", "Inspiring & Engaging", "Funny & Witty", "Professional & Expert", "Educational & Informative", "Storytelling & Emotional"]
+ },
+ es: {
+   tabCreate: "✍️ Crear", tabBoost: "🚀 Impulsar", tabEarn: "🎁 Créditos", tabAccount: "👤 Cuenta",
+   title: "🚀 PostBoost AI",
+   subtitle: "Crea contenido que capte la atención en segundos.",
+   creditsText: "Créditos disp.", statusText: "Gratis (V1 Test)",
+   labelProduct: "Producto o tema de la publicación:",
+   placeholderProduct: "Ej: AirPods Pro, ropa, consejos de estudio...",
+   labelPlatform: "Red Social Objetivo:",
+   labelTone: "Tono Deseado:",
+   btnSubmit: "✍️ Crear mi contenido (5 créditos)",
+   btnCopy: "📋 Copiar Texto",
+   spinner: "Generando contenido con IA...",
+   alertInput: "¡Por favor ingrese un producto o tema!",
+   alertCopied: "¡Texto copiado al portapapeles!",
+   alertNoCredits: "¡Créditos insuficientes (5 créditos requeridos)! Visita la pestaña Créditos.",
+   boostTitle: "🚀 Impulsar mi publicación",
+   boostSub: "Llega a una audiencia más amplia con tu contenido.",
+   boostSoon: "🚧 Próximamente",
+   boostDesc: "Esta función de publicidad automatizada llegará en la próxima actualización.",
+   notifyBtn: "🔔 Notificarme en el lanzamiento",
+   notifyAlert: "¡Anotado! Se te notificará tan pronto como esté disponible.",
+   earnTitle: "🎁 Ganar Créditos",
+   earnSub: "Usa tus créditos para generar contenido y ganar más fácilmente.",
+   refTitle: "👥 Programa de Referidos",
+   refDesc: "¡Invita a un amigo y gana 150 créditos. Tu amigo también recibe 150 créditos!",
+   refBtn: "🔗 Compartir mi enlace",
+   missionTitle: "🎯 Misiones Diarias",
+   m1: "Genera 3 publicaciones hoy → <strong>+50 créditos</strong>",
+   m2: "Inicia sesión 7 días seguidos → <strong>+300 créditos</strong>",
+   mBtn: "Reclamar",
+   accTitle: "👤 Mi Cuenta",
+   accSub: "Sigue tu saldo y le historial de tu perfil.",
+   accCreditsLabel: "Saldo actual:",
+   accStatusLabel: "Estado de cuenta:",
+   accKeyLabel: "Seguridad API:",
+   tones: ["Vendedor y Dinámico", "Inspirador y Atractivo", "Divertido", "Profesional y Experto", "Educativo", "Storytelling y Emocional"]
+ },
+ zh: {
+   tabCreate: "✍️ 创建", tabBoost: "🚀 推广", tabEarn: "🎁 积分", tabAccount: "👤 账户",
+   title: "🚀 PostBoost AI",
+   subtitle: "在几秒钟内创建吸引眼球的内容。",
+   creditsText: "可用积分", statusText: "免费版 (V1 测试)",
+   labelProduct: "产品或发布主题：",
+   placeholderProduct: "例如：AirPods Pro、服装、复习技巧...",
+   labelPlatform: "目标社交平台：",
+   labelTone: "语气风格：",
+   btnSubmit: "✍️ 创建我的内容 (5 积分)",
+   btnCopy: "📋 复制文本",
+   spinner: "AI 正在生成文案中...",
+   alertInput: "请输入产品或主题！",
+   alertCopied: "文本已复制到剪贴板！",
+   alertNoCredits: "积分不足（需要 5 积分）！请前往“积分”选项卡获取更多积分。",
+   boostTitle: "🚀 推广我的帖子",
+   boostSub: "向更广泛的受众传播您的内容。",
+   boostSoon: "🚧 即将推出",
+   boostDesc: "此自动广告功能将在 PostBoost AI 的下一次更新中推出。",
+   notifyBtn: "🔔 上线时通知我",
+   notifyAlert: "已记录！推广功能上线时我们会第一时间通知您。",
+   earnTitle: "🎁 获取积分",
+   earnSub: "使用您的积分享受内容创作，并轻松获取更多积分。",
+   refTitle: "👥 推荐奖励计划",
+   refDesc: "邀请好友即可获得 150 积分。您的好友注册也能获得 150 积分！",
+   refBtn: "🔗 分享我的专属链接",
+   missionTitle: "🎯 每日任务",
+   m1: "今天生成 3 篇帖子 → <strong>+50 积分</strong>",
+   m2: "连续登录 7 天 → <strong>+300 积分</strong>",
+   mBtn: "领取",
+   accTitle: "👤 我的账户",
+   accSub: "查看您的积分余额和个人资料。",
+   accCreditsLabel: "当前余额：",
+   accStatusLabel: "账户状态：",
+   accKeyLabel: "API 安全性：",
+   tones: ["销售与活力", "启发与互动", "幽默风趣", "专业与专家", "教育与指导", "情感故事"]
+ }
+};
+
+function switchTab(tabId, tabButton) {
+ document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+ document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+ document.getElementById('view-' + tabId).classList.add('active');
+ event.currentTarget.classList.add('active');
+}
+
+function updateCreditsUI() {
+ if (!Number.isFinite(userCredits) || userCredits < 0) {
+   userCredits = 100;
+ }
+
+ document.getElementById('credits-display').innerText = userCredits;
+ document.getElementById('acc-credits-val').innerText = userCredits;
+ localStorage.setItem('postboost_credits', userCredits);
+}
+
+function changeLanguage() {
+ const lang = document.getElementById('langSelect').value;
+ const t = translations[lang];
+
+ document.getElementById('tab-create').innerText = t.tabCreate;
+ document.getElementById('tab-boost').innerText = t.tabBoost;
+ document.getElementById('tab-earn').innerText = t.tabEarn;
+ document.getElementById('tab-account').innerText = t.tabAccount;
+
+ document.getElementById('ui-title').innerText = t.title;
+ document.getElementById('ui-subtitle').innerHTML = t.subtitle;
+ document.getElementById('ui-credits-text').innerText = t.creditsText;
+ document.getElementById('ui-status-text').innerText = t.statusText;
+ document.getElementById('ui-label-product').innerText = t.labelProduct;
+ document.getElementById('product').placeholder = t.placeholderProduct;
+ document.getElementById('ui-label-platform').innerText = t.labelPlatform;
+ document.getElementById('ui-label-tone').innerText = t.labelTone;
+ document.getElementById('ui-btn-submit').innerText = t.btnSubmit;
+ document.getElementById('ui-btn-copy').innerText = t.btnCopy;
+ document.getElementById('spinner').innerText = t.spinner;
+ 
+ document.getElementById('ui-boost-title').innerText = t.boostTitle;
+ document.getElementById('ui-boost-sub').innerText = t.boostSub;
+ document.getElementById('ui-boost-soon').innerText = t.boostSoon;
+ document.getElementById('ui-boost-desc').innerText = t.boostDesc;
+ document.getElementById('ui-notify-btn').innerText = t.notifyBtn;
+
+ document.getElementById('ui-earn-title').innerText = t.earnTitle;
+ document.getElementById('ui-earn-sub').innerText = t.earnSub;
+ document.getElementById('ui-ref-title').innerText = t.refTitle;
+ document.getElementById('ui-ref-desc').innerText = t.refDesc;
+ document.getElementById('ui-ref-btn').innerText = t.refBtn;
+ document.getElementById('ui-mission-title').innerText = t.missionTitle;
+ document.getElementById('ui-m1').innerHTML = t.m1;
+ document.getElementById('ui-m2').innerHTML = t.m2;
+ document.getElementById('ui-m-btn1').innerText = t.mBtn;
+ document.getElementById('ui-m-btn2').innerText = t.mBtn;
+
+ document.getElementById('ui-acc-title').innerText = t.accTitle;
+ document.getElementById('ui-acc-sub').innerText = t.accSub;
+ document.getElementById('acc-credits-label').innerText = t.accCreditsLabel;
+ document.getElementById('acc-status-label').innerText = t.accStatusLabel;
+ document.getElementById('acc-key-label').innerText = t.accKeyLabel;
+
+ for(let i = 1; i <= 6; i++) {
+   document.getElementById('opt-t' + i).innerText = t.tones[i-1];
+ }
+}
+
+async function generateContent() {
+ const lang = document.getElementById('langSelect').value;
+ const t = translations[lang];
+
+ // Vérification si l'utilisateur a au moins 5 crédits
+ if (userCredits < 5) {
+   alert(t.alertNoCredits);
+   return;
+ }
+
+ const product = document.getElementById('product').value.trim();
+ const platform = document.getElementById('platform').value;
+ const tone = document.getElementById('tone').value;
+
+ const resultWrapper = document.getElementById('resultWrapper');
+ const resultBox = document.getElementById('resultBox');
+ const spinner = document.getElementById('spinner');
+
+ if (!product) { alert(t.alertInput); return; }
+
+ // On déduit 5 crédits par génération
+ userCredits -= 5;
+ updateCreditsUI();
+
+ spinner.style.display = 'block';
+ resultWrapper.style.display = 'none';
+
+ const promptText = `You are a Digital Marketing Expert. Generate highly engaging social media content in the language corresponding to language code "${lang}".
+Product/Topic: ${product}
+Platform: ${platform}
+Tone: ${tone}
+
+Output format:
+### 1. 3 Catchy Hooks
+### 2. Captivating Caption
+### 3. Relevant Hashtags`;
+
+ try {
+   const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product, platform, tone, lang })
+    });
+
+   const data = await response.json();
+   spinner.style.display = 'none';
+
+   if (data.candidates && data.candidates[0].content.parts[0].text) {
+     const rawText = data.candidates[0].content.parts[0].text;
+     resultBox.innerHTML = marked.parse(rawText);
+     resultWrapper.style.display = 'block';
+   } else {
+     alert('Error generating content.');
+   }
+ } catch (err) {
+   spinner.style.display = 'none';
+   alert('Connection error: ' + err.message);
+ }
+}
+
+function copyToClipboard() {
+ const lang = document.getElementById('langSelect').value;
+ const textToCopy = document.getElementById('resultBox').innerText;
+ navigator.clipboard.writeText(textToCopy).then(() => {
+   alert(translations[lang].alertCopied);
+ });
+}
+
+function notifyMe() {
+ const lang = document.getElementById('langSelect').value;
+ alert(translations[lang].notifyAlert);
+}
+
+function shareRef() {
+ const lang = document.getElementById('langSelect').value;
+ const refText = lang === 'en' ? "Join PostBoost AI and get free credits to boost your social media!" : "Rejoins PostBoost AI et récupère tes crédits gratuits pour booster tes réseaux !";
+ if (navigator.share) {
+   navigator.share({ title: 'PostBoost AI', text: refText, url: window.location.href });
+ } else {
+   navigator.clipboard.writeText(window.location.href);
+   alert(lang === 'en' ? "Referral link copied!" : "Lien de parrainage copié !");
+ }
+}
+
+function claimMission(amount, btnElement) {
+ userCredits += amount;
+ updateCreditsUI();
+ btnElement.innerText = "✅ Validé";
+ btnElement.disabled = true;
+ btnElement.style.background = "#334155";
+ btnElement.style.color = "#94a3b8";
+}
+</script>
+
+</body>
+</html>
