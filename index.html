@@ -406,7 +406,7 @@
                 acc_balance: "📊 Saldo actual:",
                 acc_status: "📱 Estado de la cuenta:",
                 acc_active: "Activo (Versión Gratuite V1)",
-                alert_insufficient: "¡Créditos insuficientes! Recomienda amigos o completa tus misiones diarias.",
+                alert_insufficient: "¡Crédits insuffisants! Recomienda amigos o completa tus misiones diarias.",
                 alert_booster: "¡Gracias! Se te notificará tan pronto como se lance Booster.",
                 alert_ref: "¡Enlace de referido copiado!",
                 loading_text: "La IA está creando tu contenido..."
@@ -482,7 +482,7 @@
                 price: document.getElementById('price').value,
                 oldPrice: document.getElementById('oldPrice').value,
                 promo: document.getElementById('promo').value,
-                delivery: document.getElementById('delivery'].value,
+                delivery: document.getElementById('delivery').value,
                 location: document.getElementById('location').value,
                 contact: document.getElementById('contact').value,
                 link: document.getElementById('link').value
@@ -499,9 +499,8 @@
                     body: JSON.stringify(payload)
                 });
 
-                // Récupération sécurisée du texte brut d'abord pour éviter le crash Safari
+                // Lecture sécurisée pour éviter le plantage pattern de Safari
                 const rawText = await response.text();
-                
                 let data;
                 try {
                     data = JSON.parse(rawText);
