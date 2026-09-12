@@ -503,10 +503,18 @@
                     body: JSON.stringify(payload)
                 });
 
-                const data = await response.json();
+                // Essaye de parser le JSON, si la réponse échoue, récupère le texte brut
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    data = await response.json();
+                } else {
+                    const textResponse = await response.text();
+                    throw new Error(textResponse || "Erreur serveur inattendue (statut " + response.status + ")");
+                }
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Erreur');
+                    throw new Error(data.error || 'Erreur serveur (statut ' + response.status + ')');
                 }
 
                 resultText.textContent = data.text;
@@ -516,7 +524,9 @@
                 updateCreditsDisplay();
 
             } catch (err) {
-                alert('Erreur : ' + err.message);
+                // MODIFICATION : Affiche l'erreur précise au lieu de juste "Erreur"
+                alert('Erreur détaillée : ' + err.message);
+                console.error("Détail de l'erreur :", err);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = `✨ <span>${t.btn_create}</span>`;
