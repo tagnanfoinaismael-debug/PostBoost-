@@ -1,24 +1,34 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 exports.handler = async function (event) {
+
     const headers = {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-store'
     };
+
+    // ==========================================
+    // MÉTHODE
+    // ==========================================
 
     if (event.httpMethod !== 'POST') {
         return {
             statusCode: 405,
             headers,
             body: JSON.stringify({
-                error: 'Méthode non autorisée'
+                error: 'Méthode non autorisée.'
             })
         };
     }
 
     try {
-        // Vérification de la clé API
+
+        // ==========================================
+        // CLÉ GEMINI
+        // ==========================================
+
         if (!process.env.GEMINI_API_KEY) {
+
             return {
                 statusCode: 500,
                 headers,
@@ -28,12 +38,19 @@ exports.handler = async function (event) {
             };
         }
 
-        // Lecture du JSON
-        let body = {};
+
+        // ==========================================
+        // LECTURE DES DONNÉES
+        // ==========================================
+
+        let body;
 
         try {
+
             body = JSON.parse(event.body || '{}');
+
         } catch {
+
             return {
                 statusCode: 400,
                 headers,
@@ -43,12 +60,14 @@ exports.handler = async function (event) {
             };
         }
 
+
         const {
             product,
             platform = 'TikTok',
             tone = 'Vendeur & Dynamique',
             emojiStyle = 'Modéré',
             lang = 'fr',
+
             price,
             oldPrice,
             promo,
@@ -56,10 +75,16 @@ exports.handler = async function (event) {
             location,
             contact,
             link
+
         } = body;
 
-        // Vérification du produit
+
+        // ==========================================
+        // PRODUIT OBLIGATOIRE
+        // ==========================================
+
         if (!product || !String(product).trim()) {
+
             return {
                 statusCode: 400,
                 headers,
@@ -69,163 +94,175 @@ exports.handler = async function (event) {
             };
         }
 
-        // =====================================================
-        // INFORMATIONS FOURNIES PAR L'UTILISATEUR
-        // =====================================================
+
+        // ==========================================
+        // INFORMATIONS COMMERCIALES
+        // ==========================================
 
         let commercialInfo = '';
 
         if (price) {
-            commercialInfo += `- Prix actuel : ${price}\n`;
+            commercialInfo += `Prix actuel : ${price}\n`;
         }
 
         if (oldPrice) {
-            commercialInfo += `- Ancien prix : ${oldPrice}\n`;
+            commercialInfo += `Ancien prix : ${oldPrice}\n`;
         }
 
         if (promo) {
-            commercialInfo += `- Promotion : ${promo}\n`;
+            commercialInfo += `Promotion : ${promo}\n`;
         }
 
         if (delivery) {
-            commercialInfo += `- Livraison : ${delivery}\n`;
+            commercialInfo += `Livraison : ${delivery}\n`;
         }
 
         if (location) {
-            commercialInfo += `- Localisation : ${location}\n`;
+            commercialInfo += `Localisation : ${location}\n`;
         }
 
         if (contact) {
-            commercialInfo += `- Contact / WhatsApp : ${contact}\n`;
+            commercialInfo += `Contact / WhatsApp : ${contact}\n`;
         }
 
         if (link) {
-            commercialInfo += `- Lien : ${link}\n`;
+            commercialInfo += `Lien : ${link}\n`;
         }
 
         if (!commercialInfo) {
-            commercialInfo =
-                'Aucune information commerciale supplémentaire fournie.';
+            commercialInfo = 'Aucune information commerciale fournie.';
         }
 
-        // =====================================================
-        // ANGLES DE CONTENU
-        // =====================================================
+
+        // ==========================================
+        // ANGLES DE BUZZ
+        // ==========================================
 
         const angles = [
 
             `
-ANGLE : HOOK CHOC.
+ANGLE BUZZ 1 — ACCROCHE CHOC
 
-Commence immédiatement par une phrase très courte qui arrête
-le défilement.
+Commence directement par une phrase très forte qui donne
+envie de continuer.
 
-Exemples de mécanique :
-"Attends... tu fais encore ça ?"
-"Personne ne parle de ce détail..."
-"Si tu cherches [produit], regarde ça."
-"Le détail qui change tout 👀"
+Exemples de mécanismes :
+- "Personne ne te dit ça..."
+- "Attends de voir ça..."
+- "Le détail que tout le monde ignore..."
+- "Si tu fais ça, regarde bien..."
+- "Tu risques de changer d'avis..."
 
-Ne copie pas ces exemples.
-Crée ton propre hook.
+N'utilise pas forcément ces phrases mot pour mot.
+Crée une accroche originale adaptée au sujet.
 `,
 
             `
-ANGLE : CURIOSITÉ.
+ANGLE BUZZ 2 — CURIOSITÉ
 
-Donne au lecteur une raison très forte de continuer.
+Crée un effet de curiosité.
 
-Crée une petite tension ou une curiosité autour du produit
-sans inventer de faits.
+Le lecteur doit avoir envie de savoir :
+"Mais pourquoi ?"
+"Comment ?"
+"Qu'est-ce qui va arriver ?"
 
-Le lecteur doit avoir envie de découvrir la suite.
+Ne révèle pas tout dès la première phrase.
 `,
 
             `
-ANGLE : QUESTION DIRECTE.
+ANGLE BUZZ 3 — PROBLÈME → SOLUTION
 
-Commence par une question courte qui concerne directement
-le problème, le besoin ou l'envie du public.
+Commence par un problème que le public peut comprendre
+immédiatement.
 
-La question doit donner envie de répondre ou de continuer.
+Puis présente le produit ou sujet comme une réponse.
+
+Reste très court et dynamique.
 `,
 
             `
-ANGLE : PROBLÈME → SOLUTION.
+ANGLE BUZZ 4 — QUESTION QUI ARRÊTE LE SCROLL
 
-Commence par un problème réel et général lié au produit.
+Commence par une question forte.
 
-Présente ensuite le produit comme une solution intéressante.
-
-Ne prétends jamais que l'utilisateur a personnellement vécu
-ce problème.
+La question doit donner envie de lire la suite
+ou de répondre dans les commentaires.
 `,
 
             `
-ANGLE : DÉCOUVERTE.
+ANGLE BUZZ 5 — SURPRISE / CONTRASTE
 
-Présente le produit comme quelque chose qui mérite l'attention.
+Utilise un contraste ou une révélation pour attirer
+l'attention.
 
-Utilise une formulation qui donne l'impression :
-"Il faut que je regarde ça."
-
-Reste honnête et n'invente aucune caractéristique.
+Exemple de mécanisme :
+"Ça ressemble à X... mais en réalité..."
 `,
 
             `
-ANGLE : COURT ET VIRAL.
+ANGLE BUZZ 6 — STYLE VIRAL
 
-Construis une publication très courte.
+Écris comme une publication destinée à arrêter le scroll.
 
-Chaque phrase doit avoir une fonction.
-
-Supprime les phrases inutiles.
-
-Le résultat doit pouvoir être lu très rapidement sur téléphone.
+Phrases courtes.
+Rythme rapide.
+Très peu de blabla.
+Une idée par ligne si nécessaire.
 `,
 
             `
-ANGLE : INTERACTION.
+ANGLE BUZZ 7 — OFFRE CAPTIVANTE
 
-Fais participer le lecteur.
+Si des informations commerciales sont fournies,
+mets-les en valeur de manière attirante.
 
-Utilise éventuellement une question, un choix, une réaction
-ou une invitation à donner son avis.
-
-L'objectif est de favoriser les commentaires et les réactions,
-sans inventer de témoignages.
-`,
-
-            `
-ANGLE : OFFRE CAPTIVANTE.
-
-Si un prix, une promotion ou une livraison est fournie,
-mets-la en valeur de manière attractive.
-
-Ne crée jamais de réduction ou d'urgence qui n'existe pas.
-
-Si aucune offre n'est fournie, n'en invente pas.
+Si aucune promotion ou réduction n'est fournie,
+n'en invente surtout pas.
 `
         ];
+
 
         const selectedAngle =
             angles[Math.floor(Math.random() * angles.length)];
 
-        // =====================================================
+
+        // ==========================================
         // PROMPT PRINCIPAL
-        // =====================================================
+        // ==========================================
 
         const promptText = `
-Tu es un expert en création de contenu viral et captivant
-pour les réseaux sociaux.
 
-Ta mission est de créer UNE publication prête à être publiée.
+Tu es le moteur de génération de contenu viral de
+PostBoost AI.
 
-Le but principal n'est PAS d'écrire un long texte.
+Ta priorité absolue est de créer une publication
+CAPTIVANTE qui donne envie de s'arrêter, lire et
+éventuellement interagir.
 
-Le but est de CAPTER L'ATTENTION, donner envie de continuer
-à lire et, lorsque c'est pertinent, provoquer des réactions,
-commentaires, partages ou clics.
+Le public des réseaux sociaux lit très peu.
+
+Donc :
+
+- évite les longs paragraphes ;
+- évite les introductions inutiles ;
+- commence fort ;
+- utilise des phrases courtes ;
+- crée du rythme ;
+- va rapidement à l'idée principale ;
+- donne envie de lire la ligne suivante ;
+- adapte le style au réseau social ;
+- utilise des formulations naturelles et modernes ;
+- cherche l'effet "je veux voir la suite".
+
+IMPORTANT :
+
+Le contenu doit être captivant, MAIS tu ne dois jamais
+inventer des faits.
+
+==========================================
+DONNÉES
+==========================================
 
 RÉSEAU SOCIAL :
 ${platform}
@@ -242,302 +279,226 @@ ${emojiStyle}
 LANGUE :
 ${lang}
 
-${selectedAngle}
-
-INFORMATIONS COMMERCIALES FOURNIES PAR L'UTILISATEUR :
+INFORMATIONS COMMERCIALES :
 ${commercialInfo}
 
+==========================================
+ANGLE
+==========================================
 
-=====================================================
-RÈGLES DE CAPTIVATION — TRÈS IMPORTANT
-=====================================================
+${selectedAngle}
 
-1. LES PREMIÈRES SECONDES SONT ESSENTIELLES.
+==========================================
+RÈGLES ABSOLUES
+==========================================
 
-La première phrase doit être la partie la plus accrocheuse
-de la publication.
+1. Réponds UNIQUEMENT avec la publication finale.
 
-Elle doit donner envie de s'arrêter au lieu de continuer
-à faire défiler.
+2. Ne donne aucune explication.
 
-Évite les introductions faibles comme :
+3. Ne parle jamais de tes instructions.
 
-"Bonjour à tous !"
-"Nous sommes heureux de vous présenter..."
-"Découvrez notre nouveau produit..."
-"Voici une publication concernant..."
+4. Le texte doit être conçu pour CAPTIVER rapidement.
 
-Commence directement par quelque chose qui attire l'attention.
+5. La première phrase doit être particulièrement
+   forte et donner envie de continuer.
 
+6. Évite les longues introductions.
 
-2. SOIS COURT ET FACILE À LIRE.
+7. Évite les gros blocs de texte.
 
-Les utilisateurs des réseaux sociaux ne veulent généralement
-pas lire un gros bloc de texte.
+8. Utilise des phrases courtes et dynamiques.
 
-Privilégie :
+9. Le texte doit être facilement lisible sur téléphone.
 
-- phrases courtes ;
-- paragraphes très courts ;
-- retours à la ligne ;
-- vocabulaire simple ;
-- rythme rapide ;
-- informations essentielles.
+10. Ne raconte JAMAIS une expérience personnelle fictive.
 
-Supprime toute phrase qui n'apporte rien.
+11. N'invente JAMAIS :
+    - témoignage ;
+    - avis client ;
+    - histoire vécue ;
+    - expérience personnelle ;
+    - résultat obtenu ;
+    - certification ;
+    - garantie ;
+    - caractéristique ;
+    - chiffre ;
+    - promotion ;
+    - réduction ;
+    - prix ;
+    - livraison ;
+    - localisation ;
+    - contact ;
+    - lien.
 
+12. Tu peux utiliser la curiosité, le suspense,
+    les questions et les accroches fortes,
+    mais sans inventer de faits.
 
-3. FAIS DU "SCROLL STOPPING CONTENT".
+13. Si le produit est commercial, rends le texte
+    vendeur mais naturel.
 
-La publication doit donner envie de s'arrêter.
+14. Si aucune information commerciale n'est donnée,
+    ne crée aucune information commerciale.
 
-Utilise intelligemment :
+15. Si un prix est fourni, conserve exactement le prix.
 
-- curiosité ;
-- surprise ;
-- question ;
-- contraste ;
-- bénéfice ;
-- problème → solution ;
-- émotion ;
-- appel à l'action.
+16. Si une promotion est fournie, conserve exactement
+    la promotion.
 
-Mais ne force pas artificiellement le buzz.
+17. Si un contact est fourni, conserve exactement
+    le contact.
 
+18. Si un lien est fourni, conserve exactement le lien.
 
-4. NE FAIS PAS TOUJOURS LA MÊME STRUCTURE.
+19. Ne modifie jamais les informations commerciales.
 
-Chaque génération doit pouvoir être différente.
+20. N'utilise pas systématiquement la structure :
+    accroche → prix → promotion → WhatsApp.
 
-Change :
+21. Chaque génération doit pouvoir avoir une accroche,
+    une structure et un vocabulaire différents.
 
-- l'accroche ;
-- la longueur ;
-- le rythme ;
-- la construction ;
-- le vocabulaire ;
-- l'angle ;
-- l'appel à l'action.
+22. Respecte impérativement la langue demandée.
 
-Ne produis pas systématiquement :
+23. Utilise les emojis selon le style demandé.
 
-"🔥 Découvrez..."
-"✅ Produit..."
-"💰 Prix..."
-"📲 WhatsApp..."
-"Commandez maintenant !"
+24. Le résultat doit être directement copiable
+    et publiable.
 
+25. Maximum environ 80 à 120 mots sauf si le réseau
+    social ou le sujet nécessite moins.
 
-5. ADAPTE LE CONTENU AU RÉSEAU SOCIAL.
+==========================================
 
-TikTok / Reels :
-Très accrocheur, rapide, conversationnel.
+Génère maintenant UNE publication courte,
+captivante et orientée BUZZ.
 
-Instagram :
-Visuel, émotionnel, accroche forte et texte facile à scanner.
-
-Facebook :
-Plus conversationnel et orienté interaction.
-
-WhatsApp Status :
-Très court et immédiatement compréhensible.
-
-LinkedIn :
-Accroche professionnelle, intéressante et crédible.
-
-Twitter / X :
-Court, direct et percutant.
-
-YouTube Shorts :
-Hook très rapide et adapté au format court.
-
-
-=====================================================
-RÈGLES ANTI-INVENTION — ABSOLUES
-=====================================================
-
-Tu dois être créatif dans LA FORME, mais jamais dans LES FAITS.
-
-NE JAMAIS inventer :
-
-- une expérience personnelle ;
-- une histoire vécue ;
-- un témoignage ;
-- un avis client ;
-- un client satisfait ;
-- une personne ayant utilisé le produit ;
-- une promotion ;
-- une réduction ;
-- un prix ;
-- une caractéristique ;
-- une garantie ;
-- une certification ;
-- une livraison ;
-- une localisation ;
-- un numéro ;
-- un lien ;
-- un résultat ;
-- une statistique ;
-- une preuve.
-
-Par exemple, INTERDIT :
-
-"Hier, j'ai testé ce produit..."
-si l'utilisateur ne l'a pas dit.
-
-Interdit également :
-
-"Mes clients l'adorent..."
-si aucun témoignage n'a été fourni.
-
-Interdit :
-
-"Tu vas économiser 50%..."
-si aucune réduction de 50% n'a été fournie.
-
-
-=====================================================
-CRÉATIVITÉ AUTORISÉE
-=====================================================
-
-Tu peux être créatif avec :
-
-- les accroches ;
-- les formulations ;
-- les questions ;
-- les transitions ;
-- le rythme ;
-- les emojis ;
-- les appels à l'action ;
-- la mise en forme ;
-- la façon de présenter les informations.
-
-Tu peux créer une situation HYPOTHÉTIQUE uniquement si elle est
-clairement présentée comme une possibilité et non comme une
-expérience réelle de l'utilisateur.
-
-Exemple acceptable :
-
-"Imagine trouver une solution simple pour..."
- 
-Mais ne dis jamais :
-
-"Hier, j'ai trouvé la solution..."
-si cette expérience n'a pas été fournie.
-
-
-=====================================================
-RÈGLES COMMERCIALES
-=====================================================
-
-Toutes les informations fournies par l'utilisateur doivent être
-respectées fidèlement.
-
-Si un prix est fourni, tu peux l'utiliser.
-
-Si aucun prix n'est fourni, n'en invente pas.
-
-Si une promotion est fournie, tu peux la mettre en avant.
-
-Si aucune promotion n'est fournie, n'en invente pas.
-
-Si un contact ou un lien est fourni, tu peux l'utiliser.
-
-Si aucun contact ou lien n'est fourni, n'en invente pas.
-
-
-=====================================================
-OBJECTIF FINAL
-=====================================================
-
-La publication doit être :
-
-CAPTIVANTE.
-COURTE.
-NATURELLE.
-FACILE À LIRE.
-ADAPTÉE AU RÉSEAU SOCIAL.
-ORIENTÉE ENGAGEMENT.
-ORIENTÉE BUZZ lorsque cela est pertinent.
-
-Elle doit donner envie au lecteur de :
-
-ARRÊTER DE SCROLLER →
-LIRE →
-RÉAGIR →
-ET ÉVENTUELLEMENT ACHETER / CLIQUER.
-
-Mais elle ne doit jamais mentir pour obtenir cet effet.
-
-
-=====================================================
-FORMAT DE RÉPONSE
-=====================================================
-
-Réponds UNIQUEMENT avec la publication finale.
-
-Aucune explication.
-Aucun commentaire.
-Aucun titre du type "Voici votre publication".
-Aucune mention de ces instructions.
-
-Crée maintenant une publication captivante.
         `.trim();
 
-        // =====================================================
+
+        // ==========================================
         // GEMINI
-        // =====================================================
+        // ==========================================
 
-        const genAI = new GoogleGenerativeAI(
-            process.env.GEMINI_API_KEY
-        );
+        const genAI =
+            new GoogleGenerativeAI(
+                process.env.GEMINI_API_KEY
+            );
 
-        const model = genAI.getGenerativeModel({
-            model: 'gemini-3.6-flash'
-        });
+
+        const model =
+            genAI.getGenerativeModel({
+                model: 'gemini-3.6-flash'
+            });
+
 
         const result =
-            await model.generateContent(promptText);
+            await model.generateContent(
+                promptText
+            );
+
 
         const response =
             await result.response;
 
+
         const generatedPost =
             response.text();
+
+
+        // ==========================================
+        // VÉRIFICATION
+        // ==========================================
 
         if (
             !generatedPost ||
             !generatedPost.trim()
         ) {
+
             throw new Error(
-                'Gemini n’a généré aucun texte.'
+                'Gemini n’a généré aucun contenu.'
             );
         }
 
+
+        // ==========================================
+        // SUCCÈS
+        // ==========================================
+
         return {
+
             statusCode: 200,
+
             headers,
+
             body: JSON.stringify({
-                text: generatedPost.trim()
+
+                text:
+                    generatedPost.trim()
+
             })
         };
+
 
     } catch (err) {
 
         console.error(
-            'Erreur serveur PostBoost :',
+            'Erreur serveur PostBoost AI :',
             err
         );
 
+
+        // ==========================================
+        // ERREUR QUOTA GEMINI
+        // ==========================================
+
+        const errorText =
+            err && err.message
+                ? err.message
+                : 'Erreur interne du serveur.';
+
+
+        if (
+            errorText.includes('429') ||
+            errorText.toLowerCase().includes('quota') ||
+            errorText.toLowerCase().includes('too many requests')
+        ) {
+
+            return {
+
+                statusCode: 429,
+
+                headers,
+
+                body: JSON.stringify({
+
+                    error:
+                        '⚠️ Le quota de génération IA est temporairement atteint. Réessaie plus tard ou vérifie le quota de ton projet Gemini.'
+
+                })
+            };
+        }
+
+
+        // ==========================================
+        // AUTRE ERREUR
+        // ==========================================
+
         return {
+
             statusCode: 500,
+
             headers,
+
             body: JSON.stringify({
+
                 error:
-                    err && err.message
-                        ? err.message
-                        : 'Une erreur interne est survenue.'
+                    errorText
+
             })
         };
+
     }
+
 };
