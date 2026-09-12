@@ -386,9 +386,9 @@
                 ph_location: "Ubicación (ej: Madrid)", ph_contact: "Contacto / WhatsApp",
                 ph_link: "Enlace de pedido (ej: https://...)",
                 btn_create: "Crear mi contenido (5 créditos)",
-                result_title: "Resultado generado:", btn_copy: "Copier", btn_copied: "¡Copiado!",
+                result_title: "Resultado generado:", btn_copy: "Copiar", btn_copied: "¡Copiado!",
                 booster_title: "Impulsar mi publicación",
-                booster_sub: "Difunde tus contenidos a una audiencia más amplia.",
+                booster_sub: "Diffusez vos contenus auprès d'une audience plus large.",
                 soon_title: "Próximamente",
                 soon_desc: "Esta función de segmentación publicitaria automatizada llegará en la próxima actualización de PostBoost AI.",
                 btn_notify: "Avisarme del lanzamiento",
@@ -405,8 +405,8 @@
                 account_sub: "Sigue tu saldo y el historial de tu perfil.",
                 acc_balance: "📊 Saldo actual:",
                 acc_status: "📱 Estado de la cuenta:",
-                acc_active: "Activo (Versión Gratuite V1)",
-                alert_insufficient: "¡Crédits insuffisants! Recomienda amigos o completa tus misiones diarias.",
+                acc_active: "Activo (Versión Gratuita V1)",
+                alert_insufficient: "¡Créditos insuficientes! Recomienda amigos o completa tus misiones diarias.",
                 alert_booster: "¡Gracias! Se te notificará tan pronto como se lance Booster.",
                 alert_ref: "¡Enlace de referido copiado!",
                 loading_text: "La IA está creando tu contenido..."
@@ -417,6 +417,7 @@
             currentLang = document.getElementById('langSelect').value;
             const t = translations[currentLang];
 
+            // Traduction des éléments avec data-i18n
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (t[key]) {
@@ -424,6 +425,7 @@
                 }
             });
 
+            // Traduction des placeholders
             document.querySelectorAll('[data-placeholder]').forEach(input => {
                 const key = input.getAttribute('data-placeholder');
                 if (t[key]) {
@@ -432,6 +434,7 @@
             });
         }
 
+        // Gestion locale des crédits
         let userCredits = localStorage.getItem('postboost_credits') ? parseInt(localStorage.getItem('postboost_credits')) : 100;
 
         function updateCreditsDisplay() {
@@ -443,6 +446,7 @@
         }
         updateCreditsDisplay();
 
+        // Navigation entre les onglets
         function switchTab(tabName) {
             const tabs = ['creer', 'booster', 'credits', 'compte'];
             tabs.forEach(t => {
@@ -478,7 +482,7 @@
                 platform: document.getElementById('platform').value,
                 tone: document.getElementById('tone').value,
                 emojiStyle: document.getElementById('emojiStyle').value,
-                lang: currentLang,
+                lang: currentLang, // Envoi de la langue exacte choisie à l'IA
                 price: document.getElementById('price').value,
                 oldPrice: document.getElementById('oldPrice').value,
                 promo: document.getElementById('promo').value,
@@ -499,17 +503,10 @@
                     body: JSON.stringify(payload)
                 });
 
-                // Lecture sécurisée pour éviter le plantage pattern de Safari
-                const rawText = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(rawText);
-                } catch (parseError) {
-                    throw new Error("Erreur serveur (Réponse non JSON) : " + rawText.substring(0, 100));
-                }
+                const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Erreur serveur inconnue');
+                    throw new Error(data.error || 'Erreur');
                 }
 
                 resultText.textContent = data.text;
