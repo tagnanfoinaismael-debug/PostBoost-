@@ -6,7 +6,7 @@
     <title>PostBoost AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-start p-4 sm:p-6">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-start p-4 sm:p-6 pb-12">
 
     <div class="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
         
@@ -24,32 +24,52 @@
             </div>
         </div>
 
-        <!-- Navigation d'origine -->
+        <!-- Navigation par onglets d'origine -->
         <div class="grid grid-cols-4 gap-1 bg-slate-950 p-1 rounded-xl mb-6 text-xs font-semibold text-slate-400 text-center">
-            <button type="button" onclick="switchTab('creer')" id="btn-creer" class="bg-purple-600 text-white py-2 rounded-lg shadow transition">Créer</button>
-            <button type="button" onclick="switchTab('booster')" id="btn-booster" class="py-2 hover:text-slate-200 transition">Booster</button>
-            <button type="button" onclick="switchTab('credits')" id="btn-credits" class="py-2 hover:text-slate-200 transition">Crédits</button>
-            <button type="button" onclick="switchTab('compte')" id="btn-compte" class="py-2 hover:text-slate-200 transition">Compte</button>
+            <button type="button" onclick="switchTab('creer')" id="btn-creer" class="bg-purple-600 text-white py-2 rounded-lg shadow transition">✍️ Créer</button>
+            <button type="button" onclick="switchTab('booster')" id="btn-booster" class="py-2 hover:text-slate-200 transition">🚀 Booster</button>
+            <button type="button" onclick="switchTab('credits')" id="btn-credits" class="py-2 hover:text-slate-200 transition">🎁 Crédits</button>
+            <button type="button" onclick="switchTab('compte')" id="btn-compte" class="py-2 hover:text-slate-200 transition">👤 Compte</button>
         </div>
 
-        <!-- ONGLET CRÉER -->
+        <!-- ========================================== -->
+        <!-- ONGLET : CRÉER -->
+        <!-- ========================================== -->
         <div id="tab-content-creer" class="space-y-4">
             <div class="text-center mb-6">
                 <h2 class="text-xl font-bold text-slate-100">PostBoost AI</h2>
                 <p class="text-xs text-slate-400 mt-1">Crée du contenu qui attire l'attention en quelques secondes.</p>
             </div>
 
+            <!-- Compteur de crédits et statut -->
+            <div class="grid grid-cols-2 gap-2 bg-slate-950/80 border border-slate-800 rounded-xl p-3 text-xs">
+                <div class="flex items-center space-x-2">
+                    <span class="text-base">🎁</span>
+                    <div>
+                        <div id="creditDisplay" class="font-bold text-purple-400">100 Crédits</div>
+                        <div class="text-[10px] text-slate-400">disponibles</div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2 border-l border-slate-800 pl-2">
+                    <span class="text-base">🔥</span>
+                    <div>
+                        <div class="font-bold text-slate-200">Sécurisé</div>
+                        <div class="text-[10px] text-slate-400">Anti-hallucination</div>
+                    </div>
+                </div>
+            </div>
+
             <form id="boostForm" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">Produit ou Sujet *</label>
-                    <input type="text" id="product" required placeholder="Ex. Sneakers Air Max, Écouteurs sans fil..." 
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition">
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Produit ou sujet de la publication : *</label>
+                    <input type="text" id="product" required placeholder="Ex: AirPods Pro, vêtements, conseils révisions..." 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Réseau social</label>
-                        <select id="platform" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition">
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Réseau social ciblé :</label>
+                        <select id="platform" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition">
                             <option value="TikTok">TikTok</option>
                             <option value="Instagram">Instagram</option>
                             <option value="Facebook">Facebook</option>
@@ -58,9 +78,9 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-300 mb-1">Ton</label>
-                        <select id="tone" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition">
-                            <option value="Dynamique et vendeur">Vendeur & Dynamique</option>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Ton souhaité :</label>
+                        <select id="tone" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition">
+                            <option value="Vendeur & Dynamique">Vendeur & Dynamique</option>
                             <option value="Professionnel">Professionnel</option>
                             <option value="Storytelling immersif">Storytelling</option>
                             <option value="Humoristique et décalé">Humoristique</option>
@@ -69,7 +89,7 @@
                     </div>
                 </div>
 
-                <!-- BLOC INFOS COMMERCIALES AJOUTÉ -->
+                <!-- NOUVEAU BLOC : INFOS COMMERCIALES FACULTATIVES -->
                 <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">💰 Infos Commerciales (Facultatif)</span>
@@ -110,31 +130,92 @@
             </div>
         </div>
 
-        <!-- ONGLET BOOSTER -->
-        <div id="tab-content-booster" class="hidden text-center py-12 space-y-3">
+        <!-- ========================================== -->
+        <!-- ONGLET : BOOSTER -->
+        <!-- ========================================== -->
+        <div id="tab-content-booster" class="hidden text-center py-8 space-y-3">
             <span class="text-3xl">🚀</span>
             <h3 class="text-base font-bold text-slate-200">Booster Publicitaire</h3>
-            <p class="text-xs text-slate-400">Automatisez vos campagnes publicitaires directement depuis l'application.</p>
+            <p class="text-xs text-slate-400">Automatisez et diffusez vos campagnes publicitaires directement depuis l'application.</p>
+            <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-400">
+                Bientôt disponible dans la prochaine mise à jour de la V1.
+            </div>
         </div>
 
-        <!-- ONGLET CRÉDITS -->
-        <div id="tab-content-credits" class="hidden text-center py-12 space-y-3">
-            <span class="text-3xl">🎁</span>
-            <h3 class="text-base font-bold text-slate-200">Gestion des Crédits</h3>
-            <p class="text-xs text-slate-400">Vous avez <span class="text-purple-400 font-bold">50 crédits</span> disponibles.</p>
+        <!-- ========================================== -->
+        <!-- ONGLET : CRÉDITS -->
+        <!-- ========================================== -->
+        <div id="tab-content-credits" class="hidden space-y-4 py-2">
+            <div class="text-center space-y-1">
+                <span class="text-3xl">🎁</span>
+                <h3 class="text-base font-bold text-slate-200">Gagner des crédits</h3>
+                <p class="text-xs text-slate-400">Utilisez vos crédits pour générer vos contenus et en gagner plus facilement.</p>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-purple-400 uppercase">👥 Programme de Parrainage</h4>
+                <p class="text-xs text-slate-400">Invite un ami et gagne 150 crédits. Ton ami reçoit aussi 150 crédits à l'inscription !</p>
+                <button onclick="alert('Lien de parrainage copié !')" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold py-2 px-3 rounded-lg shadow">
+                    🔗 Partager mon lien unique
+                </button>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-purple-400 uppercase">🎯 Missions Quotidiennes</h4>
+                <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg text-xs">
+                    <span class="text-slate-300">Génère 3 posts aujourd'hui → <b>+50 crédits</b></span>
+                    <span class="bg-emerald-900/60 text-emerald-400 text-[10px] px-2 py-1 rounded font-bold">Validé</span>
+                </div>
+                <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg text-xs">
+                    <span class="text-slate-300">Connexion quotidienne → <b>+300 crédits</b></span>
+                    <span class="bg-emerald-900/60 text-emerald-400 text-[10px] px-2 py-1 rounded font-bold">Validé</span>
+                </div>
+            </div>
         </div>
 
-        <!-- ONGLET COMPTE -->
-        <div id="tab-content-compte" class="hidden text-center py-12 space-y-3">
-            <span class="text-3xl">👤</span>
-            <h3 class="text-base font-bold text-slate-200">Mon Compte</h3>
-            <p class="text-xs text-slate-400">Connecté en tant que créateur V1.</p>
+        <!-- ========================================== -->
+        <!-- ONGLET : COMPTE -->
+        <!-- ========================================== -->
+        <div id="tab-content-compte" class="hidden space-y-4 py-2">
+            <div class="text-center space-y-1">
+                <span class="text-3xl">👤</span>
+                <h3 class="text-base font-bold text-slate-200">Mon Compte</h3>
+                <p class="text-xs text-slate-400">Suivez votre solde et l'historique de votre profil.</p>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3 text-xs">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <span class="text-slate-400">📊 Solde actuel :</span>
+                    <span id="accountCreditDisplay" class="font-bold text-purple-400">100 Crédits</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                    <span class="text-slate-400">📱 Statut du compte :</span>
+                    <span class="font-bold text-emerald-400">Actif (Version Gratuite V1)</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400">🛡️ Sécurité API :</span>
+                    <span class="font-bold text-slate-200">Intégrée (Anti-hallucination)</span>
+                </div>
+            </div>
         </div>
 
     </div>
 
+    <!-- Script de gestion global -->
     <script>
-        // Gestion de la navigation entre les onglets d'origine
+        // Gestion locale des crédits
+        let userCredits = localStorage.getItem('postboost_credits') ? parseInt(localStorage.getItem('postboost_credits')) : 100;
+
+        function updateCreditsDisplay() {
+            document.getElementById('creditDisplay').textContent = userCredits + ' Crédits';
+            if(document.getElementById('accountCreditDisplay')) {
+                document.getElementById('accountCreditDisplay').textContent = userCredits + ' Crédits';
+            }
+            localStorage.setItem('postboost_credits', userCredits);
+        }
+        updateCreditsDisplay();
+
+        // Navigation entre les onglets
         function switchTab(tabName) {
             const tabs = ['creer', 'booster', 'credits', 'compte'];
             tabs.forEach(t => {
@@ -158,6 +239,11 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (userCredits < 5) {
+                alert("Crédits insuffisants ! Parrainez des amis ou revenez demain.");
+                return;
+            }
 
             const payload = {
                 product: document.getElementById('product').value,
@@ -192,6 +278,11 @@
 
                 resultText.textContent = data.text;
                 resultContainer.classList.remove('hidden');
+
+                // Déduction des crédits
+                userCredits -= 5;
+                updateCreditsDisplay();
+
             } catch (err) {
                 alert('Erreur : ' + err.message);
             } finally {
