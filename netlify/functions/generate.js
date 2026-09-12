@@ -1,79 +1,81 @@
-import { createClient } from '@jsdelivr/npm/@supabase/supabase-js' // ou selon ton import habituel
-import { GoogleGenAI } from '@google/genai' // ou ton client Gemini
+import { GoogleGenAI } from '@google/genai';
 
 export default async function handler(event, context) {
+    // Vérifie que la méthode est bien POST
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: JSON.stringify({ error: 'Méthode non autorisée' }) }
+        return { 
+            statusCode: 405, 
+            body: JSON.stringify({ error: 'Méthode non autorisée' }) 
+        };
     }
 
     try {
-        // 1. Récupérer le token d'autorisation envoyé par le front-end
-        const authHeader = event.headers.authorization
-        if (!authHeader) {
-            return { statusCode: 401, body: JSON.stringify({ error: 'Non authentifié.' }) }
+        // Récupération des données envoyées par ton formulaire frontend
+        const body = JSON.parse(event.body || '{}');
+        const { 
+            product, 
+            platform = 'TikTok', 
+            tone = 'Vendeur & Dynamique', 
+            emojiStyle = 'Modéré', 
+            lang = 'fr',
+            price,
+            oldPrice,
+            promo,
+            delivery,
+            location,
+            contact,
+            link
+        } = body;
+
+        if (!product) {
+            return { 
+                statusCode: 400, 
+                body: JSON.stringify({ error: 'Le produit ou sujet de la publication est requis.' }) 
+            };
         }
 
-        // 2. Initialiser Supabase avec le contexte de l'utilisateur (pour respecter les RLS)
-        const supabase = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_ANON_KEY,
-            { global: { headers: { authorization: authHeader } } }
-        )
+        // Construction des informations commerciales optionnelles pour l'IA
+        let commercialInfo = '';
+        if (price) commercialInfo += `- Prix : ${price}\n`;
+        if (oldPrice) commercialInfo += `- Ancien prix : ${oldPrice}\n`;
+        if (promo) commercialInfo += `- Promotion : ${promo}\n`;
+        if (delivery) commercialInfo += `- Livraison : ${delivery}\n`;
+        if (location) commercialInfo += `- Localisation : ${location}\n`;
+        if (contact) commercialInfo += `- Contact / WhatsApp : ${contact}\n`;
+        if (link) commercialInfo += `- Lien : ${link}\n`;
 
-        // 3. Identifier l'utilisateur
-        const { data: { user }, error: userError } = await supabase.auth.getUser()
-        if (userError || !user) {
-            return { statusCode: 401, body: JSON.stringify({ error: 'Session invalide.' }) }
-        }
+        // Création du prompt ultra-précis pour l'IA
+        const promptText = `
+Rédige une publication ultra-percutante et adaptée pour le réseau social ${platform}.
+Sujet / Produit : ${product}
+Ton souhaité : ${tone}
+Style d'emojis : ${emojiStyle}
+Langue de rédaction : ${lang} (Réponds impérativement dans cette langue).
 
-        // 4. Vérifier les crédits de l'utilisateur dans la table profiles
-        const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('credits')
-            .eq('id', user.id)
-            .single()
+Informations commerciales à inclure fidèlement si elles sont présentes (n'invente aucune fausse information si elles sont vides) :
+${commercialInfo}
+        `.trim();
 
-        if (profileError || !profile || profile.credits <= 0) {
-            return { statusCode: 403, body: JSON.stringify({ error: 'Crédits insuffisants.' }) }
-        }
-
-        // 5. Récupérer le prompt envoyé par le front-end
-        const { prompt } = JSON.parse(event.body)
-        if (!prompt) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'Le prompt est vide.' }) }
-        }
-
-        // 6. Appeler l'API Gemini avec la variable d'environnement Netlify
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+        // Appel de l'API Google GenAI avec ton modèle et ta clé d'environnement Netlify
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
         const aiResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: `Rédige un post LinkedIn professionnel et percutant basé sur cette idée : ${prompt}`,
-        })
+            contents: promptText,
+        });
 
-        const generatedPost = aiResponse.text
+        const generatedPost = aiResponse.text || '';
 
-        // 7. Débiter 1 crédit de manière sécurisée en base de données
-        const { error: updateError } = await supabase
-            .from('profiles')
-            .update({ credits: profile.credits - 1 })
-            .eq('id', user.id)
-
-        if (updateError) {
-            console.error("Erreur lors de la mise à jour des crédits :", updateError)
-        }
-
-        // 8. Renvoyer le post généré et les crédits restants au front-end
+        // Renvoie le texte généré au format attendu par ton index.html ({ text: ... })
         return {
             statusCode: 200,
-            body: JSON.stringify({
-                success: true,
-                post: generatedPost,
-                remainingCredits: profile.credits - 1
-            })
-        }
+            body: JSON.stringify({ text: generatedPost })
+        };
 
     } catch (err) {
-        console.error("Erreur serveur :", err)
-        return { statusCode: 500, body: JSON.stringify({ error: 'Erreur interne du serveur.' }) }
+        console.error("Erreur serveur :", err);
+        return { 
+            statusCode: 500, 
+            body: JSON.stringify({ error: err.message || 'Erreur interne du serveur.' }) 
+        };
     }
 }
