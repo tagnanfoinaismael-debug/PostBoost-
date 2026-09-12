@@ -138,7 +138,7 @@
             <div id="resultContainer" class="mt-6 hidden">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs font-bold text-slate-400 uppercase tracking-wider" data-i18n="result_title">Résultat généré :</span>
-                    <button id="copyBtn" class="text-xs bg-slate-800 hover:bg-slate-700 text-purple-300 px-3 py-1.5 rounded-lg transition">
+                    <button id="copyBtn" type="button" class="text-xs bg-slate-800 hover:bg-slate-700 text-purple-300 px-3 py-1.5 rounded-lg transition">
                         📋 <span data-i18n="btn_copy">Copier</span>
                     </button>
                 </div>
@@ -164,7 +164,7 @@
                 <p class="text-xs text-slate-400 leading-relaxed" data-i18n="soon_desc">
                     Cette fonctionnalité de ciblage publicitaire automatisé arrivera dans la prochaine mise à jour de PostBoost AI.
                 </p>
-                <button onclick="alert(translations[currentLang].alert_booster)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center space-x-2">
+                <button type="button" onclick="alert(translations[currentLang].alert_booster)" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center space-x-2">
                     <span>🔔</span>
                     <span data-i18n="btn_notify">Être informé du lancement</span>
                 </button>
@@ -184,7 +184,7 @@
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-purple-400 uppercase" data-i18n="ref_title">👥 Programme de Parrainage</h4>
                 <p class="text-xs text-slate-400" data-i18n="ref_desc">Invite un ami et gagne 150 crédits. Ton ami reçoit aussi 150 crédits à l'inscription !</p>
-                <button onclick="alert(translations[currentLang].alert_ref)" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold py-2 px-3 rounded-lg shadow">
+                <button type="button" onclick="copyReferralLink()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold py-2 px-3 rounded-lg shadow">
                     🔗 <span data-i18n="btn_ref">Partager mon lien unique</span>
                 </button>
             </div>
@@ -274,7 +274,7 @@
                 acc_active: "Actif (Version Gratuite V1)",
                 alert_insufficient: "Crédits insuffisants ! Parrainez des amis ou accomplissez vos missions quotidiennes.",
                 alert_booster: "Merci ! Vous serez averti dès le lancement du Booster.",
-                alert_ref: "Lien de parrainage copié !",
+                alert_ref: "Lien de parrainage copié avec succès !",
                 loading_text: "Création du contenu par l'IA en cours..."
             },
             en: {
@@ -320,7 +320,7 @@
                 acc_active: "Active (Free Version V1)",
                 alert_insufficient: "Insufficient credits! Refer friends or complete your daily missions.",
                 alert_booster: "Thank you! You will be notified as soon as Booster launches.",
-                alert_ref: "Referral link copied!",
+                alert_ref: "Referral link successfully copied!",
                 loading_text: "AI is creating your content..."
             },
             zh: {
@@ -366,7 +366,7 @@
                 acc_active: "活动（免费版 V1）",
                 alert_insufficient: "积分不足！请推荐好友或完成每日任务。",
                 alert_booster: "谢谢！推广功能上线时会通知您。",
-                alert_ref: "推荐链接已复制！",
+                alert_ref: "推荐链接复制成功！",
                 loading_text: "AI 正在创建您的内容..."
             },
             es: {
@@ -412,7 +412,7 @@
                 acc_active: "Activo (Versión Gratuita V1)",
                 alert_insufficient: "¡Créditos insuficientes! Recomienda amigos o completa tus misiones diarias.",
                 alert_booster: "¡Gracias! Se te notificará tan pronto como se lance Booster.",
-                alert_ref: "¡Enlace de referido copiado!",
+                alert_ref: "¡Enlace de referido copiado con éxito!",
                 loading_text: "La IA está creando tu contenido..."
             }
         };
@@ -435,6 +435,42 @@
                 }
             });
             updateMissionsUI();
+        }
+
+        // Fonction universelle de copie anti-blocage mobile
+        function copyToClipboard(textToCopy, successCallback) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    if (successCallback) successCallback();
+                }).catch(() => {
+                    fallbackCopyText(textToCopy, successCallback);
+                });
+            } else {
+                fallbackCopyText(textToCopy, successCallback);
+            }
+        }
+
+        function fallbackCopyText(text, successCallback) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.opacity = "0";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                if (successful && successCallback) {
+                    successCallback();
+                } else {
+                    alert("Impossible de copier automatiquement. Veuillez copier manuellement.");
+                }
+            } catch (err) {
+                alert("Erreur lors de la copie.");
+            }
+            document.body.removeChild(textArea);
         }
 
         // Gestion locale des crédits
@@ -467,17 +503,16 @@
                 } else if (!lastLogin) {
                     streak = 1;
                 } else {
-                    streak = 1; // Reset si un jour a été raté
+                    streak = 1;
                 }
                 localStorage.setItem('postboost_last_login', today);
                 localStorage.setItem('postboost_login_streak', streak);
             }
 
-            // Si la série atteint 7 jours et n'a pas encore été récompensée aujourd'hui
             if (streak >= 7 && !rewardClaimed) {
                 userCredits += 250;
                 localStorage.setItem('postboost_streak_reward_' + today, 'true');
-                localStorage.setItem('postboost_login_streak', 0); // Remise à zéro pour un nouveau cycle
+                localStorage.setItem('postboost_login_streak', 0);
                 updateCreditsDisplay();
                 alert("🔥 Incroyable ! Connexion pendant 7 jours d'affilée ! Tu gagnes 250 crédits bonus !");
             }
@@ -490,7 +525,6 @@
             let postsToday = parseInt(localStorage.getItem('postboost_posts_today') || '0');
             let genRewardClaimed = localStorage.getItem('postboost_gen_reward_' + today) === 'true';
 
-            // Réinitialiser le compteur si on change de jour
             if (lastGenDate !== today) {
                 postsToday = 0;
                 localStorage.setItem('postboost_gen_date', today);
@@ -499,7 +533,6 @@
             postsToday += 1;
             localStorage.setItem('postboost_posts_today', postsToday);
 
-            // Mission 3 posts = 20 crédits
             if (postsToday >= 3 && !genRewardClaimed) {
                 userCredits += 20;
                 localStorage.setItem('postboost_gen_reward_' + today, 'true');
@@ -513,7 +546,6 @@
             const t = translations[currentLang];
             const today = new Date().toISOString().slice(0, 10);
             
-            // Mission 1 UI
             const genRewardClaimed = localStorage.getItem('postboost_gen_reward_' + today) === 'true';
             const m1El = document.getElementById('mission1Status');
             if (m1El) {
@@ -523,7 +555,6 @@
                     : "bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800";
             }
 
-            // Mission 2 UI
             const streakRewardClaimed = localStorage.getItem('postboost_streak_reward_' + today) === 'true';
             const streak = parseInt(localStorage.getItem('postboost_login_streak') || '0');
             const m2El = document.getElementById('mission2Status');
@@ -535,10 +566,8 @@
             }
         }
 
-        // Lancement de la vérification de connexion au chargement
         checkDailyLoginMission();
 
-        // Navigation entre les onglets
         function switchTab(tabName) {
             const tabs = ['creer', 'booster', 'credits', 'compte'];
             tabs.forEach(t => {
@@ -611,11 +640,8 @@
                 resultText.textContent = data.text;
                 resultContainer.classList.remove('hidden');
 
-                // Déduction des 5 crédits de génération
                 userCredits -= 5;
                 updateCreditsDisplay();
-
-                // Validation de la progression pour la mission des 3 posts
                 checkGenerationMission();
 
             } catch (err) {
@@ -627,12 +653,23 @@
             }
         });
 
+        // Bouton Copier le résultat généré
         copyBtn.addEventListener('click', () => {
             const t = translations[currentLang];
-            navigator.clipboard.writeText(resultText.textContent);
-            copyBtn.innerHTML = `✅ <span>${t.btn_copied}</span>`;
-            setTimeout(() => { copyBtn.innerHTML = `📋 <span>${t.btn_copy}</span>`; }, 2000);
+            copyToClipboard(resultText.textContent, () => {
+                copyBtn.innerHTML = `✅ <span>${t.btn_copied}</span>`;
+                setTimeout(() => { copyBtn.innerHTML = `📋 <span>${t.btn_copy}</span>`; }, 2000);
+            });
         });
+
+        // Bouton Partager le lien de parrainage
+        function copyReferralLink() {
+            const t = translations[currentLang];
+            const refLink = window.location.origin + "?ref=user_boost";
+            copyToClipboard(refLink, () => {
+                alert(t.alert_ref);
+            });
+        }
     </script>
 </body>
 </html>
