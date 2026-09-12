@@ -1,0 +1,9 @@
+{
+  "name": "postboost",
+  "version": "1.0.0",
+  "description": "Application de generation de posts",
+  "main": "index.js",
+  "dependencies": {
+    "@google/genai": "^0.1.1"
+  }
+}
