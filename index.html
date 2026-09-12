@@ -31,7 +31,7 @@
                 onchange="changeLanguage()"
                 class="bg-transparent text-slate-300 focus:outline-none"
             >
-                <option value="fr" selected>Français (FR)</option>
+                <option value="fr">Français (FR)</option>
                 <option value="en">English (EN)</option>
                 <option value="zh">中文 (ZH)</option>
                 <option value="es">Español (ES)</option>
@@ -98,7 +98,10 @@
                 PostBoost AI
             </h2>
 
-            <p class="text-xs text-slate-400 mt-1">
+            <p
+                class="text-xs text-slate-400 mt-1"
+                data-i18n="sub_title"
+            >
                 Crée du contenu qui attire l'attention en quelques secondes.
             </p>
 
@@ -122,7 +125,10 @@
                         100 Crédits
                     </div>
 
-                    <div class="text-[10px] text-slate-400">
+                    <div
+                        class="text-[10px] text-slate-400"
+                        data-i18n="available"
+                    >
                         disponibles
                     </div>
 
@@ -136,11 +142,17 @@
 
                 <div>
 
-                    <div class="font-bold text-slate-200">
+                    <div
+                        class="font-bold text-slate-200"
+                        data-i18n="secure"
+                    >
                         Sécurisé
                     </div>
 
-                    <div class="text-[10px] text-slate-400">
+                    <div
+                        class="text-[10px] text-slate-400"
+                        data-i18n="anti_hallucination"
+                    >
                         Anti-hallucination
                     </div>
 
@@ -150,13 +162,18 @@
         </div>
 
 
+        <!-- ========================================== -->
         <!-- FORMULAIRE -->
+        <!-- ========================================== -->
 
         <form id="boostForm" class="space-y-4">
 
             <div>
 
-                <label class="block text-xs font-semibold text-slate-300 mb-1">
+                <label
+                    class="block text-xs font-semibold text-slate-300 mb-1"
+                    data-i18n="lbl_product"
+                >
                     Produit ou sujet de la publication : *
                 </label>
 
@@ -175,7 +192,10 @@
 
                 <div>
 
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">
+                    <label
+                        class="block text-xs font-semibold text-slate-300 mb-1"
+                        data-i18n="lbl_platform"
+                    >
                         Réseau social ciblé :
                     </label>
 
@@ -200,7 +220,10 @@
 
                 <div>
 
-                    <label class="block text-xs font-semibold text-slate-300 mb-1">
+                    <label
+                        class="block text-xs font-semibold text-slate-300 mb-1"
+                        data-i18n="lbl_tone"
+                    >
                         Ton souhaité :
                     </label>
 
@@ -209,23 +232,38 @@
                         class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition"
                     >
 
-                        <option value="Vendeur & Dynamique">
+                        <option
+                            value="Vendeur & Dynamique"
+                            data-tone="seller"
+                        >
                             Vendeur & Dynamique
                         </option>
 
-                        <option value="Professionnel">
+                        <option
+                            value="Professionnel"
+                            data-tone="professional"
+                        >
                             Professionnel
                         </option>
 
-                        <option value="Storytelling immersif">
+                        <option
+                            value="Storytelling immersif"
+                            data-tone="storytelling"
+                        >
                             Storytelling
                         </option>
 
-                        <option value="Humoristique et décalé">
+                        <option
+                            value="Humoristique et décalé"
+                            data-tone="humor"
+                        >
                             Humoristique
                         </option>
 
-                        <option value="Minimaliste et percutant">
+                        <option
+                            value="Minimaliste et percutant"
+                            data-tone="minimal"
+                        >
                             Minimaliste
                         </option>
 
@@ -236,11 +274,16 @@
             </div>
 
 
+            <!-- ========================================== -->
             <!-- EMOJIS -->
+            <!-- ========================================== -->
 
             <div>
 
-                <label class="block text-xs font-semibold text-slate-300 mb-1">
+                <label
+                    class="block text-xs font-semibold text-slate-300 mb-1"
+                    data-i18n="lbl_emoji"
+                >
                     😊 Style d’emojis :
                 </label>
 
@@ -249,22 +292,32 @@
                     class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition"
                 >
 
-                    <option value="Très dynamique — beaucoup d’emojis">
+                    <option
+                        value="Très dynamique — beaucoup d’emojis"
+                        data-emoji="dynamic"
+                    >
                         🔥 Très dynamique — beaucoup d'emojis
                     </option>
 
                     <option
                         value="Modéré — quelques emojis bien placés"
+                        data-emoji="moderate"
                         selected
                     >
                         ✨ Modéré — quelques emojis bien placés
                     </option>
 
-                    <option value="Professionnel — très peu d’emojis">
+                    <option
+                        value="Professionnel — très peu d’emojis"
+                        data-emoji="professional"
+                    >
                         🧑‍💼 Professionnel — très peu d'emojis
                     </option>
 
-                    <option value="Sans emojis">
+                    <option
+                        value="Sans emojis"
+                        data-emoji="none"
+                    >
                         🚫 Sans emojis
                     </option>
 
@@ -273,17 +326,25 @@
             </div>
 
 
+            <!-- ========================================== -->
             <!-- INFORMATIONS COMMERCIALES -->
+            <!-- ========================================== -->
 
             <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-3">
 
                 <div class="flex items-center justify-between">
 
-                    <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">
-                        💰 Infos Commerciales (Facultatif)
+                    <span
+                        class="text-xs font-bold text-purple-400 uppercase tracking-wider"
+                        data-i18n="commercial_title"
+                    >
+                        💰 INFOS COMMERCIALES (FACULTATIF)
                     </span>
 
-                    <span class="text-[10px] text-slate-500">
+                    <span
+                        class="text-[10px] text-slate-500"
+                        data-i18n="commercial_warning"
+                    >
                         L'IA n'inventera rien
                     </span>
 
@@ -357,7 +418,9 @@
             </div>
 
 
+            <!-- ========================================== -->
             <!-- BOUTON -->
+            <!-- ========================================== -->
 
             <button
                 type="submit"
@@ -365,7 +428,7 @@
                 class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:opacity-90 transition transform active:scale-95 text-sm"
             >
                 ✨
-                <span>
+                <span data-i18n="create_button">
                     Créer mon contenu (5 crédits)
                 </span>
             </button>
@@ -373,13 +436,21 @@
         </form>
 
 
+        <!-- ========================================== -->
         <!-- RÉSULTAT -->
+        <!-- ========================================== -->
 
-        <div id="resultContainer" class="mt-6 hidden">
+        <div
+            id="resultContainer"
+            class="mt-6 hidden"
+        >
 
             <div class="flex items-center justify-between mb-2">
 
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                <span
+                    class="text-xs font-bold text-slate-400 uppercase tracking-wider"
+                    data-i18n="result"
+                >
                     Résultat généré :
                 </span>
 
@@ -417,11 +488,17 @@
 
             <span class="text-3xl">🚀</span>
 
-            <h3 class="text-base font-bold text-slate-200">
+            <h3
+                class="text-base font-bold text-slate-200"
+                data-i18n="booster_title"
+            >
                 Booster ma publication
             </h3>
 
-            <p class="text-xs text-slate-400">
+            <p
+                class="text-xs text-slate-400"
+                data-i18n="booster_description"
+            >
                 Diffusez vos contenus auprès d'une audience plus large.
             </p>
 
@@ -434,18 +511,25 @@
                 🚧
             </div>
 
-            <h4 class="text-sm font-bold text-slate-200">
+            <h4
+                class="text-sm font-bold text-slate-200"
+                data-i18n="coming_soon"
+            >
                 Bientôt disponible
             </h4>
 
-            <p class="text-xs text-slate-400 leading-relaxed">
+            <p
+                class="text-xs text-slate-400 leading-relaxed"
+                data-i18n="booster_text"
+            >
                 Cette fonctionnalité de ciblage publicitaire automatisé arrivera dans la prochaine mise à jour de PostBoost AI.
             </p>
 
             <button
                 type="button"
-                onclick="alert('Merci ! Vous serez averti dès le lancement du Booster.')"
+                onclick="notifyBooster()"
                 class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-3 px-4 rounded-xl shadow transition"
+                data-i18n="notify"
             >
                 🔔 Être informé du lancement
             </button>
@@ -468,11 +552,17 @@
 
             <span class="text-3xl">🎁</span>
 
-            <h3 class="text-base font-bold text-slate-200">
+            <h3
+                class="text-base font-bold text-slate-200"
+                data-i18n="credits_title"
+            >
                 Gagner des crédits
             </h3>
 
-            <p class="text-xs text-slate-400">
+            <p
+                class="text-xs text-slate-400"
+                data-i18n="credits_description"
+            >
                 Utilisez vos crédits pour générer vos contenus et en gagner plus facilement.
             </p>
 
@@ -483,19 +573,25 @@
 
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
 
-            <h4 class="text-xs font-bold text-purple-400 uppercase">
+            <h4
+                class="text-xs font-bold text-purple-400 uppercase"
+                data-i18n="referral_title"
+            >
                 👥 Programme de Parrainage
             </h4>
 
-            <p class="text-xs text-slate-400">
-                Invite un ami et gagne 150 crédits.
-                Ton ami reçoit aussi 150 crédits à l'inscription !
+            <p
+                class="text-xs text-slate-400"
+                data-i18n="referral_text"
+            >
+                Invite un ami et gagne 150 crédits. Ton ami reçoit aussi 150 crédits à l'inscription !
             </p>
 
             <button
                 type="button"
                 onclick="copyReferralLink()"
                 class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold py-2 px-3 rounded-lg shadow"
+                data-i18n="share"
             >
                 🔗 Partager mon lien unique
             </button>
@@ -507,14 +603,20 @@
 
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
 
-            <h4 class="text-xs font-bold text-purple-400 uppercase">
+            <h4
+                class="text-xs font-bold text-purple-400 uppercase"
+                data-i18n="missions_title"
+            >
                 🎯 Missions Quotidiennes
             </h4>
 
 
             <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg text-xs">
 
-                <span class="text-slate-300">
+                <span
+                    class="text-slate-300"
+                    data-i18n="mission1"
+                >
                     Génère 3 posts aujourd'hui → <b>+20 crédits</b>
                 </span>
 
@@ -530,7 +632,10 @@
 
             <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg text-xs">
 
-                <span class="text-slate-300">
+                <span
+                    class="text-slate-300"
+                    data-i18n="mission2"
+                >
                     Connexion 7 jours de suite → <b>+250 crédits</b>
                 </span>
 
@@ -561,11 +666,17 @@
 
             <span class="text-3xl">👤</span>
 
-            <h3 class="text-base font-bold text-slate-200">
+            <h3
+                class="text-base font-bold text-slate-200"
+                data-i18n="account_title"
+            >
                 Mon Compte
             </h3>
 
-            <p class="text-xs text-slate-400">
+            <p
+                class="text-xs text-slate-400"
+                data-i18n="account_description"
+            >
                 Suivez votre solde et l'historique de votre profil.
             </p>
 
@@ -576,7 +687,10 @@
 
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
 
-                <span class="text-slate-400">
+                <span
+                    class="text-slate-400"
+                    data-i18n="balance"
+                >
                     📊 Solde actuel :
                 </span>
 
@@ -592,11 +706,17 @@
 
             <div class="flex justify-between items-center">
 
-                <span class="text-slate-400">
+                <span
+                    class="text-slate-400"
+                    data-i18n="account_status"
+                >
                     📱 Statut du compte :
                 </span>
 
-                <span class="font-bold text-emerald-400">
+                <span
+                    class="font-bold text-emerald-400"
+                    data-i18n="active"
+                >
                     Actif (Version Gratuite V1)
                 </span>
 
@@ -619,16 +739,829 @@
     // LANGUE
     // ==========================================
 
-    let currentLang = 'fr';
+    let currentLang =
+        localStorage.getItem(
+            'postboost_language'
+        ) || 'fr';
+
+
+    // ==========================================
+    // TRADUCTIONS
+    // ==========================================
+
+    const translations = {
+
+        fr: {
+
+            tab_create: "Créer",
+            tab_booster: "Booster",
+            tab_credits: "Crédits",
+            tab_account: "Compte",
+
+            sub_title:
+                "Crée du contenu qui attire l'attention en quelques secondes.",
+
+            available:
+                "disponibles",
+
+            secure:
+                "Sécurisé",
+
+            anti_hallucination:
+                "Anti-hallucination",
+
+            lbl_product:
+                "Produit ou sujet de la publication : *",
+
+            lbl_platform:
+                "Réseau social ciblé :",
+
+            lbl_tone:
+                "Ton souhaité :",
+
+            lbl_emoji:
+                "😊 Style d’emojis :",
+
+            commercial_title:
+                "💰 INFOS COMMERCIALES (FACULTATIF)",
+
+            commercial_warning:
+                "L'IA n'inventera rien",
+
+            create_button:
+                "Créer mon contenu (5 crédits)",
+
+            result:
+                "Résultat généré :",
+
+            copy:
+                "📋 Copier",
+
+            booster_title:
+                "Booster ma publication",
+
+            booster_description:
+                "Diffusez vos contenus auprès d'une audience plus large.",
+
+            coming_soon:
+                "Bientôt disponible",
+
+            booster_text:
+                "Cette fonctionnalité de ciblage publicitaire automatisé arrivera dans la prochaine mise à jour de PostBoost AI.",
+
+            notify:
+                "🔔 Être informé du lancement",
+
+            credits_title:
+                "Gagner des crédits",
+
+            credits_description:
+                "Utilisez vos crédits pour générer vos contenus et en gagner plus facilement.",
+
+            referral_title:
+                "👥 Programme de Parrainage",
+
+            referral_text:
+                "Invite un ami et gagne 150 crédits. Ton ami reçoit aussi 150 crédits à l'inscription !",
+
+            share:
+                "🔗 Partager mon lien unique",
+
+            missions_title:
+                "🎯 Missions Quotidiennes",
+
+            mission1:
+                "Génère 3 posts aujourd'hui → +20 crédits",
+
+            mission2:
+                "Connexion 7 jours de suite → +250 crédits",
+
+            in_progress:
+                "En cours",
+
+            finished:
+                "Terminé 🎉",
+
+            account_title:
+                "Mon Compte",
+
+            account_description:
+                "Suivez votre solde et l'historique de votre profil.",
+
+            balance:
+                "📊 Solde actuel :",
+
+            account_status:
+                "📱 Statut du compte :",
+
+            active:
+                "Actif (Version Gratuite V1)",
+
+            product_placeholder:
+                "Ex: AirPods Pro, vêtements, conseils révisions...",
+
+            price_placeholder:
+                "Prix (ex: 12 000 FCFA)",
+
+            old_price_placeholder:
+                "Ancien prix (ex: 15 000)",
+
+            promo_placeholder:
+                "Promo (ex: -20%)",
+
+            delivery_placeholder:
+                "Livraison (ex: Rapide 24h)",
+
+            location_placeholder:
+                "Localisation (ex: Ouagadougou)",
+
+            contact_placeholder:
+                "Contact / WhatsApp",
+
+            link_placeholder:
+                "Lien de commande (ex: https://...)",
+
+            seller_tone:
+                "Vendeur & Dynamique",
+
+            professional_tone:
+                "Professionnel",
+
+            storytelling_tone:
+                "Storytelling",
+
+            humor_tone:
+                "Humoristique",
+
+            minimal_tone:
+                "Minimaliste",
+
+            emoji_dynamic:
+                "🔥 Très dynamique — beaucoup d'emojis",
+
+            emoji_moderate:
+                "✨ Modéré — quelques emojis bien placés",
+
+            emoji_professional:
+                "🧑‍💼 Professionnel — très peu d'emojis",
+
+            emoji_none:
+                "🚫 Sans emojis",
+
+            insufficient:
+                "Crédits insuffisants ! Parrainez des amis ou accomplissez vos missions quotidiennes.",
+
+            enter_product:
+                "Veuillez entrer un produit ou un sujet.",
+
+            loading:
+                "✨ Création du contenu par l’IA en cours...",
+
+            copied:
+                "✅ Copié !",
+
+            copy_error:
+                "Impossible de copier automatiquement.",
+
+            copy_failed:
+                "Erreur lors de la copie.",
+
+            referral_copied:
+                "Lien de parrainage copié avec succès !\n\nLien :",
+
+            referral_welcome:
+                "🎁 Bienvenue ! Grâce au lien de parrainage de ton ami, tu gagnes +150 crédits à l'inscription !",
+
+            login_reward:
+                "🔥 Incroyable ! Connexion pendant 7 jours d'affilée ! Tu gagnes 250 crédits bonus !",
+
+            generation_reward:
+                "🎉 Bravo ! Mission accomplie : 3 posts générés aujourd'hui ! Tu gagnes 20 crédits.",
+
+            booster_alert:
+                "Merci ! Vous serez averti dès le lancement du Booster.",
+
+            error_prefix:
+                "Erreur :"
+        },
+
+
+        en: {
+
+            tab_create:
+                "Create",
+
+            tab_booster:
+                "Boost",
+
+            tab_credits:
+                "Credits",
+
+            tab_account:
+                "Account",
+
+            sub_title:
+                "Create content that grabs attention in seconds.",
+
+            available:
+                "available",
+
+            secure:
+                "Secure",
+
+            anti_hallucination:
+                "Anti-hallucination",
+
+            lbl_product:
+                "Product or topic of the post: *",
+
+            lbl_platform:
+                "Target social network:",
+
+            lbl_tone:
+                "Desired tone:",
+
+            lbl_emoji:
+                "😊 Emoji style:",
+
+            commercial_title:
+                "💰 COMMERCIAL INFO (OPTIONAL)",
+
+            commercial_warning:
+                "AI will not invent anything",
+
+            create_button:
+                "Create my content (5 credits)",
+
+            result:
+                "Generated result:",
+
+            copy:
+                "📋 Copy",
+
+            booster_title:
+                "Boost my post",
+
+            booster_description:
+                "Reach a larger audience with your content.",
+
+            coming_soon:
+                "Coming soon",
+
+            booster_text:
+                "This automated advertising targeting feature will arrive in the next PostBoost AI update.",
+
+            notify:
+                "🔔 Notify me when it launches",
+
+            credits_title:
+                "Earn credits",
+
+            credits_description:
+                "Use your credits to generate content and earn more easily.",
+
+            referral_title:
+                "👥 Referral Program",
+
+            referral_text:
+                "Invite a friend and earn 150 credits. Your friend also receives 150 credits when signing up!",
+
+            share:
+                "🔗 Share my unique link",
+
+            missions_title:
+                "🎯 Daily Missions",
+
+            mission1:
+                "Generate 3 posts today → +20 credits",
+
+            mission2:
+                "Log in 7 days in a row → +250 credits",
+
+            in_progress:
+                "In progress",
+
+            finished:
+                "Completed 🎉",
+
+            account_title:
+                "My Account",
+
+            account_description:
+                "Track your balance and profile history.",
+
+            balance:
+                "📊 Current balance:",
+
+            account_status:
+                "📱 Account status:",
+
+            active:
+                "Active (Free Version V1)",
+
+            product_placeholder:
+                "Ex: AirPods Pro, clothing, study tips...",
+
+            price_placeholder:
+                "Price (ex: 12,000 FCFA)",
+
+            old_price_placeholder:
+                "Old price (ex: 15,000)",
+
+            promo_placeholder:
+                "Promotion (ex: -20%)",
+
+            delivery_placeholder:
+                "Delivery (ex: Fast 24h)",
+
+            location_placeholder:
+                "Location (ex: Ouagadougou)",
+
+            contact_placeholder:
+                "Contact / WhatsApp",
+
+            link_placeholder:
+                "Order link (ex: https://...)",
+
+            seller_tone:
+                "Seller & Dynamic",
+
+            professional_tone:
+                "Professional",
+
+            storytelling_tone:
+                "Storytelling",
+
+            humor_tone:
+                "Humorous",
+
+            minimal_tone:
+                "Minimalist",
+
+            emoji_dynamic:
+                "🔥 Very dynamic — lots of emojis",
+
+            emoji_moderate:
+                "✨ Moderate — a few well-placed emojis",
+
+            emoji_professional:
+                "🧑‍💼 Professional — very few emojis",
+
+            emoji_none:
+                "🚫 No emojis",
+
+            insufficient:
+                "Not enough credits! Refer friends or complete your daily missions.",
+
+            enter_product:
+                "Please enter a product or topic.",
+
+            loading:
+                "✨ AI is creating your content...",
+
+            copied:
+                "✅ Copied!",
+
+            copy_error:
+                "Unable to copy automatically.",
+
+            copy_failed:
+                "Copy error.",
+
+            referral_copied:
+                "Referral link copied successfully!\n\nLink:",
+
+            referral_welcome:
+                "🎁 Welcome! Thanks to your friend's referral link, you receive +150 credits when signing up!",
+
+            login_reward:
+                "🔥 Incredible! You logged in for 7 days in a row! You earned 250 bonus credits!",
+
+            generation_reward:
+                "🎉 Great job! Mission completed: 3 posts generated today! You earned 20 credits.",
+
+            booster_alert:
+                "Thank you! You will be notified when Booster launches.",
+
+            error_prefix:
+                "Error:"
+        },
+
+
+        zh: {
+
+            tab_create:
+                "创建",
+
+            tab_booster:
+                "推广",
+
+            tab_credits:
+                "积分",
+
+            tab_account:
+                "账户",
+
+            sub_title:
+                "几秒钟内创建吸引注意力的内容。",
+
+            available:
+                "可用",
+
+            secure:
+                "安全",
+
+            anti_hallucination:
+                "防止虚构",
+
+            lbl_product:
+                "帖子产品或主题：*",
+
+            lbl_platform:
+                "目标社交平台：",
+
+            lbl_tone:
+                "所需语气：",
+
+            lbl_emoji:
+                "😊 表情符号风格：",
+
+            commercial_title:
+                "💰 商业信息（可选）",
+
+            commercial_warning:
+                "AI 不会编造信息",
+
+            create_button:
+                "创建我的内容（5积分）",
+
+            result:
+                "生成结果：",
+
+            copy:
+                "📋 复制",
+
+            booster_title:
+                "推广我的帖子",
+
+            booster_description:
+                "让你的内容触达更多受众。",
+
+            coming_soon:
+                "即将推出",
+
+            booster_text:
+                "自动广告定位功能将在 PostBoost AI 下一次更新中推出。",
+
+            notify:
+                "🔔 上线时通知我",
+
+            credits_title:
+                "赚取积分",
+
+            credits_description:
+                "使用积分生成内容，并轻松赚取更多积分。",
+
+            referral_title:
+                "👥 邀请计划",
+
+            referral_text:
+                "邀请朋友并获得150积分。你的朋友注册后也会获得150积分！",
+
+            share:
+                "🔗 分享我的专属链接",
+
+            missions_title:
+                "🎯 每日任务",
+
+            mission1:
+                "今天生成3个帖子 → +20积分",
+
+            mission2:
+                "连续登录7天 → +250积分",
+
+            in_progress:
+                "进行中",
+
+            finished:
+                "已完成 🎉",
+
+            account_title:
+                "我的账户",
+
+            account_description:
+                "查看你的积分余额和账户信息。",
+
+            balance:
+                "📊 当前余额：",
+
+            account_status:
+                "📱 账户状态：",
+
+            active:
+                "已激活（免费版 V1）",
+
+            product_placeholder:
+                "例如：耳机、服装、学习技巧...",
+
+            price_placeholder:
+                "价格（例如：12,000 FCFA）",
+
+            old_price_placeholder:
+                "原价（例如：15,000）",
+
+            promo_placeholder:
+                "促销（例如：-20%）",
+
+            delivery_placeholder:
+                "配送（例如：24小时快速配送）",
+
+            location_placeholder:
+                "地点（例如：瓦加杜古）",
+
+            contact_placeholder:
+                "联系方式 / WhatsApp",
+
+            link_placeholder:
+                "订单链接（例如：https://...)",
+
+            seller_tone:
+                "销售型 & 活力",
+
+            professional_tone:
+                "专业",
+
+            storytelling_tone:
+                "故事型",
+
+            humor_tone:
+                "幽默",
+
+            minimal_tone:
+                "简洁有力",
+
+            emoji_dynamic:
+                "🔥 非常活跃 — 大量表情",
+
+            emoji_moderate:
+                "✨ 适中 — 少量恰当的表情",
+
+            emoji_professional:
+                "🧑‍💼 专业 — 很少表情",
+
+            emoji_none:
+                "🚫 不使用表情",
+
+            insufficient:
+                "积分不足！邀请朋友或完成每日任务即可获得更多积分。",
+
+            enter_product:
+                "请输入产品或主题。",
+
+            loading:
+                "✨ AI 正在创建你的内容...",
+
+            copied:
+                "✅ 已复制！",
+
+            copy_error:
+                "无法自动复制。",
+
+            copy_failed:
+                "复制时出错。",
+
+            referral_copied:
+                "邀请链接复制成功！\n\n链接：",
+
+            referral_welcome:
+                "🎁 欢迎！通过朋友的邀请链接注册，你获得了 +150 积分！",
+
+            login_reward:
+                "🔥 太棒了！连续登录7天！你获得了250积分奖励！",
+
+            generation_reward:
+                "🎉 做得好！任务完成：今天生成了3个帖子！你获得20积分。",
+
+            booster_alert:
+                "谢谢！Booster 上线后你会收到通知。",
+
+            error_prefix:
+                "错误："
+        },
+
+
+        es: {
+
+            tab_create:
+                "Crear",
+
+            tab_booster:
+                "Impulsar",
+
+            tab_credits:
+                "Créditos",
+
+            tab_account:
+                "Cuenta",
+
+            sub_title:
+                "Crea contenido que capte la atención en segundos.",
+
+            available:
+                "disponibles",
+
+            secure:
+                "Seguro",
+
+            anti_hallucination:
+                "Anti-alucinación",
+
+            lbl_product:
+                "Producto o tema de la publicación: *",
+
+            lbl_platform:
+                "Red social objetivo:",
+
+            lbl_tone:
+                "Tono deseado:",
+
+            lbl_emoji:
+                "😊 Estilo de emojis:",
+
+            commercial_title:
+                "💰 INFORMACIÓN COMERCIAL (OPCIONAL)",
+
+            commercial_warning:
+                "La IA no inventará nada",
+
+            create_button:
+                "Crear mi contenido (5 créditos)",
+
+            result:
+                "Resultado generado:",
+
+            copy:
+                "📋 Copiar",
+
+            booster_title:
+                "Impulsar mi publicación",
+
+            booster_description:
+                "Difunde tu contenido a una audiencia más amplia.",
+
+            coming_soon:
+                "Próximamente",
+
+            booster_text:
+                "Esta función de segmentación publicitaria automatizada llegará en la próxima actualización de PostBoost AI.",
+
+            notify:
+                "🔔 Avisarme cuando esté disponible",
+
+            credits_title:
+                "Ganar créditos",
+
+            credits_description:
+                "Usa tus créditos para generar contenido y ganar más fácilmente.",
+
+            referral_title:
+                "👥 Programa de referidos",
+
+            referral_text:
+                "Invita a un amigo y gana 150 créditos. ¡Tu amigo también recibe 150 créditos al registrarse!",
+
+            share:
+                "🔗 Compartir mi enlace único",
+
+            missions_title:
+                "🎯 Misiones diarias",
+
+            mission1:
+                "Genera 3 publicaciones hoy → +20 créditos",
+
+            mission2:
+                "Inicia sesión durante 7 días seguidos → +250 créditos",
+
+            in_progress:
+                "En curso",
+
+            finished:
+                "Completado 🎉",
+
+            account_title:
+                "Mi cuenta",
+
+            account_description:
+                "Consulta tu saldo y la información de tu perfil.",
+
+            balance:
+                "📊 Saldo actual:",
+
+            account_status:
+                "📱 Estado de la cuenta:",
+
+            active:
+                "Activa (Versión gratuita V1)",
+
+            product_placeholder:
+                "Ej: AirPods Pro, ropa, consejos de estudio...",
+
+            price_placeholder:
+                "Precio (ej: 12.000 FCFA)",
+
+            old_price_placeholder:
+                "Precio anterior (ej: 15.000)",
+
+            promo_placeholder:
+                "Promoción (ej: -20%)",
+
+            delivery_placeholder:
+                "Entrega (ej: Rápida 24h)",
+
+            location_placeholder:
+                "Ubicación (ej: Uagadugú)",
+
+            contact_placeholder:
+                "Contacto / WhatsApp",
+
+            link_placeholder:
+                "Enlace de pedido (ej: https://...)",
+
+            seller_tone:
+                "Vendedor & Dinámico",
+
+            professional_tone:
+                "Profesional",
+
+            storytelling_tone:
+                "Storytelling",
+
+            humor_tone:
+                "Humorístico",
+
+            minimal_tone:
+                "Minimalista",
+
+            emoji_dynamic:
+                "🔥 Muy dinámico — muchos emojis",
+
+            emoji_moderate:
+                "✨ Moderado — algunos emojis bien colocados",
+
+            emoji_professional:
+                "🧑‍💼 Profesional — muy pocos emojis",
+
+            emoji_none:
+                "🚫 Sin emojis",
+
+            insufficient:
+                "¡Créditos insuficientes! Invita amigos o completa tus misiones diarias.",
+
+            enter_product:
+                "Introduce un producto o tema.",
+
+            loading:
+                "✨ La IA está creando tu contenido...",
+
+            copied:
+                "✅ ¡Copiado!",
+
+            copy_error:
+                "No se puede copiar automáticamente.",
+
+            copy_failed:
+                "Error al copiar.",
+
+            referral_copied:
+                "¡Enlace de referido copiado correctamente!\n\nEnlace:",
+
+            referral_welcome:
+                "🎁 ¡Bienvenido! Gracias al enlace de referido de tu amigo, recibes +150 créditos al registrarte.",
+
+            login_reward:
+                "🔥 ¡Increíble! ¡Has iniciado sesión durante 7 días seguidos! ¡Has ganado 250 créditos de bonus!",
+
+            generation_reward:
+                "🎉 ¡Excelente! Misión completada: ¡3 publicaciones generadas hoy! Has ganado 20 créditos.",
+
+            booster_alert:
+                "¡Gracias! Recibirás una notificación cuando Booster esté disponible.",
+
+            error_prefix:
+                "Error:"
+        }
+    };
 
 
     // ==========================================
     // IDENTIFIANT UTILISATEUR
     // ==========================================
 
-    let userId = localStorage.getItem(
-        'postboost_user_id'
-    );
+    let userId =
+        localStorage.getItem(
+            'postboost_user_id'
+        );
+
 
     if (!userId) {
 
@@ -653,6 +1586,7 @@
         localStorage.getItem(
             'postboost_credits'
         );
+
 
     let userCredits =
         savedCredits !== null
@@ -714,7 +1648,236 @@
     }
 
 
-    updateCreditsDisplay();
+    // ==========================================
+    // TRADUIRE L'INTERFACE
+    // ==========================================
+
+    function applyLanguage() {
+
+        const lang =
+            translations[currentLang] ||
+            translations.fr;
+
+
+        // Tous les éléments data-i18n
+
+        document
+            .querySelectorAll('[data-i18n]')
+            .forEach(element => {
+
+                const key =
+                    element.getAttribute(
+                        'data-i18n'
+                    );
+
+                if (lang[key]) {
+
+                    // Pour les boutons/textes
+                    element.textContent =
+                        lang[key];
+                }
+            });
+
+
+        // ======================================
+        // PLACEHOLDERS
+        // ======================================
+
+        const placeholders = {
+
+            product:
+                'product_placeholder',
+
+            price:
+                'price_placeholder',
+
+            oldPrice:
+                'old_price_placeholder',
+
+            promo:
+                'promo_placeholder',
+
+            delivery:
+                'delivery_placeholder',
+
+            location:
+                'location_placeholder',
+
+            contact:
+                'contact_placeholder',
+
+            link:
+                'link_placeholder'
+        };
+
+
+        Object.keys(placeholders)
+            .forEach(id => {
+
+                const element =
+                    document.getElementById(
+                        id
+                    );
+
+
+                if (
+                    element &&
+                    lang[placeholders[id]]
+                ) {
+
+                    element.placeholder =
+                        lang[
+                            placeholders[id]
+                        ];
+                }
+
+            });
+
+
+        // ======================================
+        // TON
+        // ======================================
+
+        const toneOptions =
+            document.querySelectorAll(
+                '#tone option'
+            );
+
+
+        toneOptions.forEach(option => {
+
+            const type =
+                option.getAttribute(
+                    'data-tone'
+                );
+
+
+            if (type === 'seller') {
+
+                option.textContent =
+                    lang.seller_tone;
+
+            } else if (
+                type === 'professional'
+            ) {
+
+                option.textContent =
+                    lang.professional_tone;
+
+            } else if (
+                type === 'storytelling'
+            ) {
+
+                option.textContent =
+                    lang.storytelling_tone;
+
+            } else if (
+                type === 'humor'
+            ) {
+
+                option.textContent =
+                    lang.humor_tone;
+
+            } else if (
+                type === 'minimal'
+            ) {
+
+                option.textContent =
+                    lang.minimal_tone;
+            }
+
+        });
+
+
+        // ======================================
+        // STYLE EMOJIS
+        // ======================================
+
+        const emojiOptions =
+            document.querySelectorAll(
+                '#emojiStyle option'
+            );
+
+
+        emojiOptions.forEach(option => {
+
+            const type =
+                option.getAttribute(
+                    'data-emoji'
+                );
+
+
+            if (type === 'dynamic') {
+
+                option.textContent =
+                    lang.emoji_dynamic;
+
+            } else if (
+                type === 'moderate'
+            ) {
+
+                option.textContent =
+                    lang.emoji_moderate;
+
+            } else if (
+                type === 'professional'
+            ) {
+
+                option.textContent =
+                    lang.emoji_professional;
+
+            } else if (
+                type === 'none'
+            ) {
+
+                option.textContent =
+                    lang.emoji_none;
+            }
+
+        });
+
+
+        // ======================================
+        // CRÉDITS
+        // ======================================
+
+        updateCreditsDisplay();
+
+
+        // ======================================
+        // MISSIONS
+        // ======================================
+
+        updateMissionsUI();
+    }
+
+
+    // ==========================================
+    // INITIALISATION
+    // ==========================================
+
+    const langSelect =
+        document.getElementById(
+            'langSelect'
+        );
+
+
+    if (
+        translations[currentLang] &&
+        langSelect
+    ) {
+
+        langSelect.value =
+            currentLang;
+
+    } else {
+
+        currentLang = 'fr';
+
+        if (langSelect) {
+            langSelect.value = 'fr';
+        }
+    }
 
 
     // ==========================================
@@ -758,15 +1921,17 @@
                 updateCreditsDisplay();
 
 
+                const lang =
+                    translations[currentLang] ||
+                    translations.fr;
+
+
                 alert(
-                    "🎁 Bienvenue ! Grâce au lien de parrainage de ton ami, tu gagnes +150 crédits à l'inscription !"
+                    lang.referral_welcome
                 );
             }
         }
     }
-
-
-    checkReferralBonus();
 
 
     // ==========================================
@@ -822,7 +1987,8 @@
             );
 
 
-        textArea.value = text;
+        textArea.value =
+            text;
 
 
         textArea.style.position =
@@ -865,15 +2031,23 @@
 
             } else {
 
+                const lang =
+                    translations[currentLang] ||
+                    translations.fr;
+
                 alert(
-                    "Impossible de copier automatiquement."
+                    lang.copy_error
                 );
             }
 
         } catch (err) {
 
+            const lang =
+                translations[currentLang] ||
+                translations.fr;
+
             alert(
-                "Erreur lors de la copie."
+                lang.copy_failed
             );
 
         }
@@ -900,12 +2074,18 @@
             `${baseUrl}?ref=${userId}`;
 
 
+        const lang =
+            translations[currentLang] ||
+            translations.fr;
+
+
         copyToClipboard(
             refLink,
             () => {
 
                 alert(
-                    "Lien de parrainage copié avec succès !\n\n" +
+                    lang.referral_copied +
+                    "\n" +
                     refLink
                 );
 
@@ -948,7 +2128,9 @@
             ) === 'true';
 
 
-        if (lastLogin !== today) {
+        if (
+            lastLogin !== today
+        ) {
 
             const yesterday =
                 new Date();
@@ -1015,8 +2197,13 @@
             updateCreditsDisplay();
 
 
+            const lang =
+                translations[currentLang] ||
+                translations.fr;
+
+
             alert(
-                "🔥 Incroyable ! Connexion pendant 7 jours d'affilée ! Tu gagnes 250 crédits bonus !"
+                lang.login_reward
             );
         }
 
@@ -1056,8 +2243,7 @@
 
 
         if (
-            lastGenDate !==
-            today
+            lastGenDate !== today
         ) {
 
             postsToday = 0;
@@ -1097,8 +2283,13 @@
             updateCreditsDisplay();
 
 
+            const lang =
+                translations[currentLang] ||
+                translations.fr;
+
+
             alert(
-                "🎉 Bravo ! Mission accomplie : 3 posts générés aujourd'hui ! Tu gagnes 20 crédits."
+                lang.generation_reward
             );
         }
 
@@ -1128,12 +2319,17 @@
             );
 
 
+        const lang =
+            translations[currentLang] ||
+            translations.fr;
+
+
         if (m1El) {
 
             m1El.textContent =
                 genRewardClaimed
-                    ? 'Terminé 🎉'
-                    : 'En cours';
+                    ? lang.finished
+                    : lang.in_progress;
 
 
             m1El.className =
@@ -1171,8 +2367,35 @@
 
             m2El.textContent =
                 streakRewardClaimed
-                    ? 'Terminé 🎉'
+                    ? lang.finished
                     : `${streak}/7 j`;
+
+
+            if (currentLang === 'en') {
+
+                m2El.textContent =
+                    streakRewardClaimed
+                        ? lang.finished
+                        : `${streak}/7 d`;
+
+            } else if (
+                currentLang === 'zh'
+            ) {
+
+                m2El.textContent =
+                    streakRewardClaimed
+                        ? lang.finished
+                        : `${streak}/7 天`;
+
+            } else if (
+                currentLang === 'es'
+            ) {
+
+                m2El.textContent =
+                    streakRewardClaimed
+                        ? lang.finished
+                        : `${streak}/7 d`;
+            }
 
 
             m2El.className =
@@ -1183,9 +2406,6 @@
                     : "bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800";
         }
     }
-
-
-    checkDailyLoginMission();
 
 
     // ==========================================
@@ -1202,47 +2422,60 @@
         ];
 
 
-        tabs.forEach(
-            tab => {
+        tabs.forEach(tab => {
 
-                const btn =
-                    document.getElementById(
-                        'btn-' + tab
-                    );
-
-
-                const content =
-                    document.getElementById(
-                        'tab-content-' +
-                        tab
-                    );
+            const btn =
+                document.getElementById(
+                    'btn-' + tab
+                );
 
 
-                if (
-                    tab ===
-                    tabName
-                ) {
-
-                    btn.className =
-                        "bg-purple-600 text-white py-2 rounded-lg shadow transition";
+            const content =
+                document.getElementById(
+                    'tab-content-' + tab
+                );
 
 
-                    content.classList.remove(
-                        'hidden'
-                    );
+            if (
+                tab === tabName
+            ) {
 
-                } else {
-
-                    btn.className =
-                        "py-2 hover:text-slate-200 transition";
+                btn.className =
+                    "bg-purple-600 text-white py-2 rounded-lg shadow transition";
 
 
-                    content.classList.add(
-                        'hidden'
-                    );
-                }
+                content.classList.remove(
+                    'hidden'
+                );
 
+            } else {
+
+                btn.className =
+                    "py-2 hover:text-slate-200 transition";
+
+
+                content.classList.add(
+                    'hidden'
+                );
             }
+
+        });
+    }
+
+
+    // ==========================================
+    // BOOSTER
+    // ==========================================
+
+    function notifyBooster() {
+
+        const lang =
+            translations[currentLang] ||
+            translations.fr;
+
+
+        alert(
+            lang.booster_alert
         );
     }
 
@@ -1292,8 +2525,13 @@
             e.preventDefault();
 
 
+            const lang =
+                translations[currentLang] ||
+                translations.fr;
+
+
             // ==================================
-            // VÉRIFICATION DES CRÉDITS
+            // CRÉDITS
             // ==================================
 
             if (
@@ -1301,7 +2539,7 @@
             ) {
 
                 alert(
-                    "Crédits insuffisants ! Parrainez des amis ou accomplissez vos missions quotidiennes."
+                    lang.insufficient
                 );
 
                 return;
@@ -1309,7 +2547,7 @@
 
 
             // ==================================
-            // DONNÉES DU FORMULAIRE
+            // DONNÉES
             // ==================================
 
             const payload = {
@@ -1375,7 +2613,7 @@
 
 
             // ==================================
-            // VÉRIFICATION PRODUIT
+            // PRODUIT
             // ==================================
 
             if (
@@ -1383,7 +2621,7 @@
             ) {
 
                 alert(
-                    "Veuillez entrer un produit ou un sujet."
+                    lang.enter_product
                 );
 
                 return;
@@ -1391,15 +2629,17 @@
 
 
             // ==================================
-            // BOUTON CHARGEMENT
+            // CHARGEMENT
             // ==================================
 
             submitBtn.disabled =
                 true;
 
 
-            submitBtn.textContent =
-                "✨ Création du contenu par l’IA en cours...";
+            submitBtn.innerHTML =
+                '✨ <span>' +
+                lang.loading +
+                '</span>';
 
 
             resultContainer.classList.add(
@@ -1432,10 +2672,6 @@
                     );
 
 
-                // ==================================
-                // LECTURE ROBUSTE DE LA RÉPONSE
-                // ==================================
-
                 const raw =
                     await response.text();
 
@@ -1457,26 +2693,19 @@
 
 
                 console.log(
-                    "Réponse de generate.js :",
+                    'Réponse generate.js :',
                     data
                 );
 
 
                 console.log(
-                    "Statut HTTP :",
+                    'Statut HTTP :',
                     response.status
                 );
 
 
                 // ==================================
-                // PROTECTION CONTRE LE BUG JSON
-                // ==================================
-                //
-                // Si l'ancien serveur renvoie :
-                //
-                // error: '{"text":"..."}'
-                //
-                // on récupère quand même le texte.
+                // ANCIEN BUG JSON
                 // ==================================
 
                 if (
@@ -1503,9 +2732,7 @@
                         }
 
                     } catch {
-
-                        // Rien à faire :
-                        // ce n'était pas du JSON imbriqué.
+                        // Rien à faire
                     }
                 }
 
@@ -1530,14 +2757,8 @@
                     );
 
 
-                    // ==================================
-                    // RETRAIT DES 5 CRÉDITS
-                    // ==================================
-                    //
-                    // IMPORTANT :
-                    // les crédits sont retirés seulement
-                    // après une génération réussie.
-                    // ==================================
+                    // Retrait seulement
+                    // après succès
 
                     userCredits -= 5;
 
@@ -1553,10 +2774,6 @@
                     updateCreditsDisplay();
 
 
-                    // ==================================
-                    // MISSION 3 POSTS
-                    // ==================================
-
                     checkGenerationMission();
 
 
@@ -1565,7 +2782,7 @@
 
 
                 // ==================================
-                // VRAIE ERREUR
+                // ERREUR
                 // ==================================
 
                 let errorMessage =
@@ -1590,37 +2807,30 @@
             } catch (err) {
 
                 console.error(
-                    "Erreur complète :",
+                    'Erreur complète :',
                     err
                 );
 
 
-                // ==================================
-                // IMPORTANT :
-                // AUCUN CRÉDIT N'EST RETIRÉ
-                // EN CAS D'ERREUR.
-                // ==================================
-
                 alert(
-                    "Erreur : " +
+                    lang.error_prefix +
+                    ' ' +
                     (
                         err.message ||
-                        "Une erreur inconnue est survenue."
+                        'Une erreur inconnue est survenue.'
                     )
                 );
 
             } finally {
-
-                // ==================================
-                // RÉACTIVATION DU BOUTON
-                // ==================================
 
                 submitBtn.disabled =
                     false;
 
 
                 submitBtn.innerHTML =
-                    "✨ <span>Créer mon contenu (5 crédits)</span>";
+                    '✨ <span data-i18n="create_button">' +
+                    lang.create_button +
+                    '</span>';
             }
 
         }
@@ -1635,19 +2845,24 @@
         'click',
         () => {
 
+            const lang =
+                translations[currentLang] ||
+                translations.fr;
+
+
             copyToClipboard(
                 resultText.textContent,
                 () => {
 
                     copyBtn.textContent =
-                        '✅ Copié !';
+                        lang.copied;
 
 
                     setTimeout(
                         () => {
 
                             copyBtn.textContent =
-                                '📋 Copier';
+                                lang.copy;
 
                         },
                         2000
@@ -1672,11 +2887,41 @@
             ).value;
 
 
-        updateCreditsDisplay();
+        // Sauvegarder la langue
+
+        localStorage.setItem(
+            'postboost_language',
+            currentLang
+        );
 
 
-        updateMissionsUI();
+        // Changer la langue de la page HTML
+
+        document.documentElement.lang =
+            currentLang;
+
+
+        // Traduire toute l'interface
+
+        applyLanguage();
     }
+
+
+    // ==========================================
+    // INITIALISATION FINALE
+    // ==========================================
+
+    document.documentElement.lang =
+        currentLang;
+
+
+    applyLanguage();
+
+
+    checkReferralBonus();
+
+
+    checkDailyLoginMission();
 
 </script>
 
