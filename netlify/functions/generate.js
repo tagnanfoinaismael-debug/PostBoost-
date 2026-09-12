@@ -13,8 +13,8 @@ exports.handler = async function(event, context) {
 
     const prompt = `Génère une publication pour ${platform} avec un ton ${tone} concernant ce sujet/produit : ${product}. La langue de la réponse doit être ${lang}.`;
 
-    // Appel direct à l'API Gemini de Google sans installation de package externe
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    // Appel direct à l'API Gemini avec le nouveau modèle mis à jour
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
