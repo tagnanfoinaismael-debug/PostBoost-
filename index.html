@@ -389,7 +389,7 @@
                 ph_location: "Ubicación (ej: Madrid)", ph_contact: "Contacto / WhatsApp",
                 ph_link: "Enlace de pedido (ej: https://...)",
                 btn_create: "Crear mi contenido (5 créditos)",
-                result_title: "Resultado generado:", btn_copy: "Copiar", btn_copied: "¡Copiado!",
+                result_title: "Resultado generado:", btn_copy: "Copier", btn_copied: "¡Copiado!",
                 booster_title: "Impulsar mi publicación",
                 booster_sub: "Diffusez vos contenus auprès d'une audience plus large.",
                 soon_title: "Próximamente",
@@ -399,7 +399,7 @@
                 credits_sub: "Usa tus créditos para generar contenidos y gana más fácilmente.",
                 ref_title: "👥 Programa de Referidos",
                 ref_desc: "¡Invita a un amigo y gana 150 créditos. Tu amigo también recibe 150 créditos al registrarse!",
-                btn_ref: "Compartir mi enlace único",
+                btn_ref: "Compartir mi lien único",
                 missions_title: "🎯 Misiones Diarias",
                 mission_1: "Generar más de 3 publicaciones (diarias) → <b>+20 créditos</b>",
                 mission_2: "Conectarse 7 días seguidos → <b>+250 créditos</b>",
@@ -410,7 +410,7 @@
                 acc_balance: "📊 Saldo actual:",
                 acc_status: "📱 Estado de la cuenta:",
                 acc_active: "Activo (Versión Gratuita V1)",
-                alert_insufficient: "¡Créditos insuficientes! Recomienda amigos o completa tus misiones diarias.",
+                alert_insufficient: "¡Crédits insuffisants ! Recomienda amigos o completa tus misiones diarias.",
                 alert_booster: "¡Gracias! Se te notificará tan pronto como se lance Booster.",
                 alert_ref: "¡Enlace de referido copiado con éxito!",
                 loading_text: "La IA está creando tu contenido..."
@@ -473,7 +473,13 @@
             document.body.removeChild(textArea);
         }
 
-        // Gestion locale des crédits
+        // Gestion locale des crédits et de l'ID utilisateur (Parrainage)
+        let userId = localStorage.getItem('postboost_user_id');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substring(2, 9);
+            localStorage.setItem('postboost_user_id', userId);
+        }
+
         let userCredits = localStorage.getItem('postboost_credits') ? parseInt(localStorage.getItem('postboost_credits')) : 100;
 
         function updateCreditsDisplay() {
@@ -485,6 +491,23 @@
             localStorage.setItem('postboost_credits', userCredits);
         }
         updateCreditsDisplay();
+
+        // GESTION AUTOMATIQUE DU PARRAINAGE VIA URL (?ref=...)
+        function checkReferralBonus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+
+            if (refCode && refCode !== userId) {
+                const alreadyClaimed = localStorage.getItem('postboost_ref_claimed');
+                if (!alreadyClaimed) {
+                    userCredits += 150;
+                    localStorage.setItem('postboost_ref_claimed', 'true');
+                    updateCreditsDisplay();
+                    alert("🎁 Bienvenue ! Grâce au lien de parrainage de ton ami, tu gagnes +150 crédits de bonus à l'inscription !");
+                }
+            }
+        }
+        checkReferralBonus();
 
         // LOGIQUE DES MISSIONS QUOTIDIENNES
         function checkDailyLoginMission() {
@@ -624,17 +647,10 @@
                     body: JSON.stringify(payload)
                 });
 
-                let data;
-                const contentType = response.headers.get("content-type");
-                if (contentType && contentType.indexOf("application/json") !== -1) {
-                    data = await response.json();
-                } else {
-                    const textResponse = await response.text();
-                    throw new Error(textResponse || "Erreur serveur inattendue (statut " + response.status + ")");
-                }
+                const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Erreur serveur (statut ' + response.status + ')');
+                    throw new Error(data.error || 'Erreur serveur');
                 }
 
                 resultText.textContent = data.text;
@@ -662,12 +678,14 @@
             });
         });
 
-        // Bouton Partager le lien de parrainage
+        // Bouton Partager le lien de parrainage fonctionnel
         function copyReferralLink() {
             const t = translations[currentLang];
-            const refLink = window.location.origin + "?ref=user_boost";
+            const baseUrl = window.location.origin + window.location.pathname;
+            const refLink = `${baseUrl}?ref=${userId}`;
+            
             copyToClipboard(refLink, () => {
-                alert(t.alert_ref);
+                alert(t.alert_ref + "\n\nLien : " + refLink);
             });
         }
     </script>
