@@ -1,86 +1,79 @@
-const { GoogleGenAI } = require('@google/genai');
+import { createClient } from '@jsdelivr/npm/@supabase/supabase-js' // ou selon ton import habituel
+import { GoogleGenAI } from '@google/genai' // ou ton client Gemini
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-exports.handler = async function(event, context) {
+export default async function handler(event, context) {
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
+        return { statusCode: 405, body: JSON.stringify({ error: 'Méthode non autorisée' }) }
     }
 
     try {
-        const data = JSON.parse(event.body);
-        const { product, platform, tone, emojiStyle, lang, price, oldPrice, promo, delivery, location, contact, link } = data;
-
-        if (!product) {
-            return { statusCode: 400, body: JSON.stringify({ error: 'Le produit ou sujet est requis.' }) };
+        // 1. Récupérer le token d'autorisation envoyé par le front-end
+        const authHeader = event.headers.authorization
+        if (!authHeader) {
+            return { statusCode: 401, body: JSON.stringify({ error: 'Non authentifié.' }) }
         }
 
-        // Rédiger les instructions selon la langue
-        let langInstruction = "Rédige la publication en Français.";
-        if (lang === 'en') langInstruction = "Write the post in English.";
-        if (lang === 'zh') langInstruction = "用中文撰写帖子。";
-        if (lang === 'es') langInstruction = "Escribe la publicación en Español.";
+        // 2. Initialiser Supabase avec le contexte de l'utilisateur (pour respecter les RLS)
+        const supabase = createClient(
+            process.env.SUPABASE_URL,
+            process.env.SUPABASE_ANON_KEY,
+            { global: { headers: { authorization: authHeader } } }
+        )
 
-        // Règle anti-répétition et de variation d'angle
-        const antiRepetitionRule = `
-        IMPORTANT - VARIATION OBLIGATOIRE :
-        À chaque génération, tu dois impérativement changer d'angle marketing, de structure de texte et d'accroche (hook). Ne formule jamais de la même manière. 
-        Alterne aléatoirement entre différents styles d'approche : 
-        1. L'angle "Curiosité / Question provocquante"
-        2. L'angle "Bénéfice direct / Résolution de problème"
-        3. L'angle "Urgence / Opportunité rare"
-        4. L'angle "Storytelling immersif / Témoignage"
-        Ne réutilise pas de structure répétitive. Sois créatif, percutant et unique.
-        `;
+        // 3. Identifier l'utilisateur
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (userError || !user) {
+            return { statusCode: 401, body: JSON.stringify({ error: 'Session invalide.' }) }
+        }
 
-        const commercialDetails = `
-        Détails commerciaux à intégrer fidèlement (n'invente rien d'autre si ce n'est pas fourni) :
-        - Prix : ${price || 'Non spécifié'}
-        - Ancien prix : ${oldPrice || 'Non spécifié'}
-        - Promotion : ${promo || 'Non spécifié'}
-        - Livraison : ${delivery || 'Non spécifié'}
-        - Localisation : ${location || 'Non spécifié'}
-        - Contact / WhatsApp : ${contact || 'Non spécifié'}
-        - Lien : ${link || 'Non spécifié'}
-        `;
+        // 4. Vérifier les crédits de l'utilisateur dans la table profiles
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('credits')
+            .eq('id', user.id)
+            .single()
 
-        const prompt = `
-        Tu es un expert en marketing digital et copywriter d'élite pour les réseaux sociaux.
-        ${langInstruction}
-        ${antiRepetitionRule}
+        if (profileError || !profile || profile.credits <= 0) {
+            return { statusCode: 403, body: JSON.stringify({ error: 'Crédits insuffisants.' }) }
+        }
 
-        Crée une publication ultra-engageante optimisée spécifiquement pour la plateforme : ${platform}.
-        Le ton souhaité est : ${tone}.
-        Le style d'emojis demandé est : ${emojiStyle}.
-        Le produit ou sujet principal est : ${product}.
+        // 5. Récupérer le prompt envoyé par le front-end
+        const { prompt } = JSON.parse(event.body)
+        if (!prompt) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'Le prompt est vide.' }) }
+        }
 
-        ${commercialDetails}
-
-        Respecte scrupuleusement le style d'emojis choisi. Structure ton texte avec des sauts de ligne propres, des accroches fortes et des appels à l'action clairs. N'ajoute aucun commentaire avant ou après, donne directement le texte prêt à être publié.
-        `;
-
-        // Appel à l'API Gemini avec une température élevée pour stimuler la créativité et la variété
-        const response = await ai.models.generateContent({
+        // 6. Appeler l'API Gemini avec la variable d'environnement Netlify
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
+        const aiResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: prompt,
-            config: {
-                temperature: 0.9, // Température haute pour éviter les répétitions et forcer l'originalité
-                maxOutputTokens: 1000,
-            }
-        });
+            contents: `Rédige un post LinkedIn professionnel et percutant basé sur cette idée : ${prompt}`,
+        })
 
-        const generatedText = response.text;
+        const generatedPost = aiResponse.text
 
+        // 7. Débiter 1 crédit de manière sécurisée en base de données
+        const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ credits: profile.credits - 1 })
+            .eq('id', user.id)
+
+        if (updateError) {
+            console.error("Erreur lors de la mise à jour des crédits :", updateError)
+        }
+
+        // 8. Renvoyer le post généré et les crédits restants au front-end
         return {
             statusCode: 200,
-            body: JSON.stringify({ text: generatedText })
-        };
+            body: JSON.stringify({
+                success: true,
+                post: generatedPost,
+                remainingCredits: profile.credits - 1
+            })
+        }
 
-    } catch (error) {
-        console.error('Erreur Backend :', error);
-        return {
-            statusCode: 500,
-            body: JSON.stringify({ error: error.message || 'Erreur interne du serveur.' })
-        };
+    } catch (err) {
+        console.error("Erreur serveur :", err)
+        return { statusCode: 500, body: JSON.stringify({ error: 'Erreur interne du serveur.' }) }
     }
-};
+}
