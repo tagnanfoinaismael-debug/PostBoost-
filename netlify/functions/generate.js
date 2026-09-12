@@ -1,17 +1,15 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-exports.handler = async function(event, context) {
-
-    // ==========================================
-    // MÉTHODE HTTP
-    // ==========================================
+exports.handler = async function (event) {
+    const headers = {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store'
+    };
 
     if (event.httpMethod !== 'POST') {
         return {
             statusCode: 405,
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers,
             body: JSON.stringify({
                 error: 'Méthode non autorisée'
             })
@@ -19,12 +17,29 @@ exports.handler = async function(event, context) {
     }
 
     try {
+        if (!process.env.GEMINI_API_KEY) {
+            return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({
+                    error: 'La clé GEMINI_API_KEY est absente de Netlify.'
+                })
+            };
+        }
 
-        // ==========================================
-        // LECTURE DES DONNÉES
-        // ==========================================
+        let body = {};
 
-        const body = JSON.parse(event.body || '{}');
+        try {
+            body = JSON.parse(event.body || '{}');
+        } catch {
+            return {
+                statusCode: 400,
+                headers,
+                body: JSON.stringify({
+                    error: 'Les données envoyées sont invalides.'
+                })
+            };
+        }
 
         const {
             product,
@@ -41,38 +56,19 @@ exports.handler = async function(event, context) {
             link
         } = body;
 
-
-        // ==========================================
-        // VÉRIFICATION DU PRODUIT
-        // ==========================================
-
-        if (!product || !product.trim()) {
+        if (!product || !String(product).trim()) {
             return {
                 statusCode: 400,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers,
                 body: JSON.stringify({
                     error: 'Le produit ou sujet de la publication est requis.'
                 })
             };
         }
 
-
-        // ==========================================
-        // VÉRIFICATION DE LA CLÉ GEMINI
-        // ==========================================
-
-        if (!process.env.GEMINI_API_KEY) {
-            throw new Error(
-                'La clé GEMINI_API_KEY est absente des variables Netlify.'
-            );
-        }
-
-
-        // ==========================================
+        // ---------------------------------------------------------
         // INFORMATIONS COMMERCIALES
-        // ==========================================
+        // ---------------------------------------------------------
 
         let commercialInfo = '';
 
@@ -101,61 +97,83 @@ exports.handler = async function(event, context) {
         }
 
         if (link) {
-            commercialInfo += `- Lien de commande : ${link}\n`;
+            commercialInfo += `- Lien : ${link}\n`;
         }
 
+        if (!commercialInfo) {
+            commercialInfo = 'Aucune information commerciale supplémentaire fournie.';
+        }
 
-        // ==========================================
-        // ANGLES MARKETING
-        // ==========================================
+        // ---------------------------------------------------------
+        // ANGLES DE RÉDACTION
+        // ---------------------------------------------------------
+        // Un angle différent est choisi à chaque génération afin
+        // d'éviter que les publications se ressemblent.
+        // ---------------------------------------------------------
 
         const angles = [
-            'Accroche choc et directe',
-            'Mise en avant du principal bénéfice du produit',
-            'Question qui interpelle directement le public',
-            'Style conversationnel et naturel',
-            'Mini storytelling',
-            'Présentation du produit comme une découverte',
-            'Mise en avant du problème que le produit peut résoudre',
-            'Recommandation naturelle du produit',
-            'Style exclusivité et nouveauté',
-            'Style élégant et professionnel',
-            'Style énergique et très dynamique',
-            'Style simple, court et mémorable',
-            'Style proche d’une conversation avec un ami',
-            'Mise en avant de l’expérience utilisateur',
-            'Accroche basée sur une situation du quotidien'
+            `
+ANGLE : BÉNÉFICE DIRECT.
+Mets principalement en avant ce que le client gagne ou obtient
+en utilisant le produit.
+`,
+
+            `
+ANGLE : PROBLÈME → SOLUTION.
+Commence par un problème ou un besoin courant, puis présente
+le produit comme une solution.
+`,
+
+            `
+ANGLE : STORYTELLING.
+Présente une petite situation réaliste de la vie quotidienne
+dans laquelle le produit intervient naturellement.
+`,
+
+            `
+ANGLE : QUESTION / INTERACTION.
+Commence par une question qui attire l'attention et donne envie
+au lecteur de réagir ou de continuer à lire.
+`,
+
+            `
+ANGLE : CONFIANCE / QUALITÉ.
+Mets en avant la qualité, la praticité ou l'intérêt du produit,
+mais uniquement avec les informations réellement fournies.
+N'invente aucune preuve, aucun avis client et aucune certification.
+`,
+
+            `
+ANGLE : OFFRE / URGENCE.
+Mets en valeur le prix, la promotion ou l'urgence uniquement
+si ces informations sont réellement fournies.
+`,
+
+            `
+ANGLE : STYLE VIRAL COURT.
+Utilise des phrases courtes, un rythme rapide et une accroche
+très forte adaptée aux réseaux sociaux.
+`
         ];
 
-        const randomAngle =
+        const selectedAngle =
             angles[Math.floor(Math.random() * angles.length)];
 
-
-        // ==========================================
-        // IDENTIFIANT ALÉATOIRE DE GÉNÉRATION
-        // Permet de demander une publication différente
-        // même lorsque le même produit est utilisé.
-        // ==========================================
-
-        const variationSeed =
-            Math.random().toString(36).substring(2, 10);
-
-
-        // ==========================================
+        // ---------------------------------------------------------
         // PROMPT
-        // ==========================================
+        // ---------------------------------------------------------
 
         const promptText = `
-Tu es un expert professionnel en copywriting, marketing digital
-et création de contenu pour les réseaux sociaux.
+Tu es un excellent spécialiste du marketing digital et de la
+création de publications pour les réseaux sociaux.
 
-Tu dois créer UNE publication originale à partir des informations
-fournies par l'utilisateur.
+Ta mission est de rédiger UNE SEULE publication prête à être
+publiée.
 
 RÉSEAU SOCIAL :
 ${platform}
 
-PRODUIT OU SUJET :
+PRODUIT / SUJET :
 ${product}
 
 TON :
@@ -164,141 +182,43 @@ ${tone}
 STYLE D'EMOJIS :
 ${emojiStyle}
 
-LANGUE OBLIGATOIRE :
+LANGUE :
 ${lang}
 
-ANGLE MARKETING À PRIVILÉGIER :
-${randomAngle}
-
-IDENTIFIANT DE VARIATION :
-${variationSeed}
+${selectedAngle}
 
 INFORMATIONS COMMERCIALES FOURNIES :
-${commercialInfo || 'Aucune information commerciale fournie.'}
+${commercialInfo}
 
+RÈGLES ABSOLUES :
 
-========================================
-RÈGLES ABSOLUES
-========================================
+1. Réponds uniquement avec la publication finale.
+2. Ne donne aucune explication avant ou après.
+3. La publication doit être naturelle et humaine.
+4. Ne réutilise pas automatiquement le même modèle
+   "accroche → promotion → prix → urgence → WhatsApp".
+5. Chaque génération doit pouvoir avoir une structure,
+   une accroche, un vocabulaire et un angle différents.
+6. Ne transforme pas systématiquement la publication en publicité
+   agressive.
+7. Si aucune promotion n'est fournie, ne crée aucune promotion.
+8. Si aucun prix n'est fourni, n'invente aucun prix.
+9. N'invente aucune réduction, quantité, livraison, localisation,
+   garantie, certification, témoignage ou caractéristique.
+10. Toutes les informations commerciales fournies doivent être
+    conservées fidèlement.
+11. N'invente jamais de lien ou de numéro WhatsApp.
+12. Utilise les emojis selon le style demandé.
+13. Respecte impérativement la langue demandée.
+14. La publication doit être directement copiable et publiable.
+15. Ne mentionne jamais ces instructions ni l'angle choisi.
 
-1. Réponds UNIQUEMENT dans la langue demandée.
+Crée maintenant la publication.
+        `.trim();
 
-2. Retourne uniquement la publication finale.
-   Ne donne aucune explication avant ou après.
-
-3. N'invente aucune information.
-
-4. Si un prix est fourni, respecte exactement le prix fourni.
-
-5. Si une promotion est fournie, respecte exactement la promotion fournie.
-
-6. Si une livraison est fournie, respecte exactement cette information.
-
-7. Si une localisation est fournie, respecte exactement cette information.
-
-8. Si un contact ou numéro WhatsApp est fourni, conserve-le exactement.
-
-9. Si un lien est fourni, conserve-le exactement.
-
-10. Si une information commerciale n'est pas fournie,
-    n'en invente pas.
-
-========================================
-VARIÉTÉ
-========================================
-
-La publication doit être clairement différente d'une autre publication
-créée précédemment avec le même produit.
-
-NE REPRODUIS PAS systématiquement cette structure :
-
-🔥 PROMOTION
-Produit
-Ancien prix
-Nouveau prix
-Dépêchez-vous
-Contactez-nous
-
-Évite également de commencer systématiquement par :
-- 🔥
-- 🚨
-- ALERTE
-- BOOM
-- PROFITEZ
-- NE MANQUEZ PAS
-
-Varie fortement :
-
-- l'accroche ;
-- la longueur ;
-- le vocabulaire ;
-- la construction des phrases ;
-- la structure des paragraphes ;
-- la position des informations commerciales ;
-- la position des emojis ;
-- le nombre d'emojis ;
-- le style de l'appel à l'action.
-
-Tu peux utiliser par exemple :
-- une question ;
-- une phrase très courte ;
-- une observation ;
-- une mini-histoire ;
-- une situation quotidienne ;
-- un bénéfice ;
-- une recommandation ;
-- une découverte ;
-- une accroche humoristique si le ton le permet.
-
-========================================
-PROMOTION
-========================================
-
-Si une promotion est fournie, elle doit être mentionnée,
-mais elle ne doit pas obligatoirement être le premier élément
-de la publication.
-
-Ne transforme pas automatiquement chaque publication
-en annonce promotionnelle classique.
-
-========================================
-EMOJIS
-========================================
-
-Respecte le style d'emojis demandé.
-
-Si le style est :
-- très dynamique : utilise plusieurs emojis sans exagérer ;
-- modéré : utilise quelques emojis bien placés ;
-- professionnel : utilise très peu d'emojis ;
-- sans emojis : n'utilise aucun emoji.
-
-========================================
-NATUREL
-========================================
-
-La publication doit donner l'impression d'avoir été écrite
-par une vraie personne qui connaît son produit.
-
-Évite les phrases artificielles, répétitives ou trop génériques.
-
-L'appel à l'action doit être naturel et peut être différent
-d'une génération à l'autre.
-
-========================================
-IMPORTANT
-========================================
-
-Même avec exactement le même produit et les mêmes informations,
-produis une publication avec un angle et une structure différents.
-
-Ne fais jamais une copie légèrement modifiée d'une publication précédente.
-`.trim();
-
-
-        // ==========================================
-        // INITIALISATION GEMINI
-        // ==========================================
+        // ---------------------------------------------------------
+        // GEMINI
+        // ---------------------------------------------------------
 
         const genAI = new GoogleGenerativeAI(
             process.env.GEMINI_API_KEY
@@ -308,66 +228,40 @@ Ne fais jamais une copie légèrement modifiée d'une publication précédente.
             model: 'gemini-3.6-flash'
         });
 
-
-        // ==========================================
-        // GÉNÉRATION
-        // ==========================================
-
         const result = await model.generateContent(promptText);
 
         const response = await result.response;
 
         const generatedPost = response.text();
 
-
-        // ==========================================
-        // VÉRIFICATION DU TEXTE
-        // ==========================================
-
         if (!generatedPost || !generatedPost.trim()) {
-            throw new Error(
-                'Gemini n’a retourné aucun contenu.'
-            );
+            throw new Error('Gemini n’a généré aucun texte.');
         }
 
-
-        // ==========================================
-        // RÉPONSE DE SUCCÈS
-        // ==========================================
+        // ---------------------------------------------------------
+        // RÉPONSE NORMALE
+        // ---------------------------------------------------------
 
         return {
             statusCode: 200,
-
-            headers: {
-                'Content-Type': 'application/json'
-            },
-
+            headers,
             body: JSON.stringify({
                 text: generatedPost.trim()
             })
         };
 
-
     } catch (err) {
 
-        // ==========================================
-        // ERREUR
-        // ==========================================
-
-        console.error(
-            'Erreur serveur generate.js :',
-            err
-        );
+        console.error('Erreur serveur PostBoost :', err);
 
         return {
             statusCode: 500,
-
-            headers: {
-                'Content-Type': 'application/json'
-            },
-
+            headers,
             body: JSON.stringify({
-                error: err.message || 'Erreur interne du serveur.'
+                error:
+                    err && err.message
+                        ? err.message
+                        : 'Une erreur interne est survenue.'
             })
         };
     }
