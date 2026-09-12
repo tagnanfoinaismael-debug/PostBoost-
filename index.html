@@ -16,10 +16,12 @@
                 ⚡ PostBoost AI
             </h1>
             <div class="flex items-center space-x-1 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs">
-                <span>🇫🇷</span>
+                <span>🌐</span>
                 <select id="lang" class="bg-transparent text-slate-300 focus:outline-none">
-                    <option value="Français">FR</option>
-                    <option value="Anglais">EN</option>
+                    <option value="Français">Français (FR)</option>
+                    <option value="Anglais">English (EN)</option>
+                    <option value="Chinois">中文 (ZH)</option>
+                    <option value="Espagnol">Español (ES)</option>
                 </select>
             </div>
         </div>
@@ -75,6 +77,9 @@
                             <option value="Facebook">Facebook</option>
                             <option value="LinkedIn">LinkedIn</option>
                             <option value="Twitter / X">Twitter / X</option>
+                            <option value="YouTube Shorts">YouTube Shorts</option>
+                            <option value="WhatsApp Status">WhatsApp Status</option>
+                            <option value="Telegram">Telegram</option>
                         </select>
                     </div>
                     <div>
@@ -142,7 +147,7 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- ONGLET : BOOSTER (Mis à jour style image) -->
+        <!-- ONGLET : BOOSTER -->
         <!-- ========================================== -->
         <div id="tab-content-booster" class="hidden space-y-4 py-2">
             <div class="text-center space-y-1">
@@ -198,7 +203,7 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- ONGLET : COMPTE (Épuré, sans sécurité API) -->
+        <!-- ONGLET : COMPTE -->
         <!-- ========================================== -->
         <div id="tab-content-compte" class="hidden space-y-4 py-2">
             <div class="text-center space-y-1">
@@ -270,7 +275,7 @@
                 platform: document.getElementById('platform').value,
                 tone: document.getElementById('tone').value,
                 emojiStyle: document.getElementById('emojiStyle').value,
-                lang: document.getElementById('lang').value,
+                lang: document.getElementById('lang').value, // Envoi de la langue au serveur backend
                 price: document.getElementById('price').value,
                 oldPrice: document.getElementById('oldPrice').value,
                 promo: document.getElementById('promo').value,
