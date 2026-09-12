@@ -52,9 +52,9 @@ Informations commerciales à inclure fidèlement si elles sont présentes (n'inv
 ${commercialInfo}
         `.trim();
 
-        // Initialisation avec le SDK officiel correct et le modèle mis à jour
+        // Initialisation avec le SDK officiel et le modèle gemini-3.6-flash
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' });
 
         const result = await model.generateContent(promptText);
         const response = await result.response;
