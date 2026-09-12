@@ -1,5 +1,136 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
+const MODEL_NAME = 'gemini-3.6-flash';
+
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+function getErrorMessage(error) {
+    if (!error) return '';
+
+    if (typeof error === 'string') {
+        return error;
+    }
+
+    if (error.message) {
+        return String(error.message);
+    }
+
+    try {
+        return JSON.stringify(error);
+    } catch {
+        return String(error);
+    }
+}
+
+function detectGeminiError(error) {
+    const message = getErrorMessage(error).toLowerCase();
+
+    if (
+        message.includes('generate_content_free_tier_requests') ||
+        message.includes('quota exceeded') ||
+        message.includes('quota_exceeded') ||
+        message.includes('daily quota')
+    ) {
+        return 'daily_quota';
+    }
+
+    if (
+        message.includes('too many requests') ||
+        message.includes('rate limit') ||
+        message.includes('rate_limit_exceeded') ||
+        message.includes('resource_exhausted')
+    ) {
+        return 'temporary_rate_limit';
+    }
+
+    if (
+        message.includes('api key') ||
+        message.includes('invalid') && message.includes('key') ||
+        message.includes('authentication')
+    ) {
+        return 'api_key';
+    }
+
+    if (
+        message.includes('model not found') ||
+        message.includes('not_found')
+    ) {
+        return 'model_not_found';
+    }
+
+    if (
+        message.includes('safety') ||
+        message.includes('blocked')
+    ) {
+        return 'blocked';
+    }
+
+    if (
+        message.includes('503') ||
+        message.includes('service unavailable') ||
+        message.includes('unavailable')
+    ) {
+        return 'service_unavailable';
+    }
+
+    return 'unknown';
+}
+
+function getFriendlyError(type) {
+
+    switch (type) {
+
+        case 'daily_quota':
+            return {
+                statusCode: 429,
+                message:
+                    '⚠️ Le quota quotidien de l’IA est atteint pour le moment. Tes crédits PostBoost sont toujours disponibles, mais Gemini doit attendre le renouvellement de son quota.'
+            };
+
+        case 'temporary_rate_limit':
+            return {
+                statusCode: 429,
+                message:
+                    '⏳ Trop de demandes IA ont été envoyées en peu de temps. Attends quelques secondes puis réessaie.'
+            };
+
+        case 'api_key':
+            return {
+                statusCode: 500,
+                message:
+                    '🔑 La clé API Gemini n’est pas correctement configurée sur le serveur.'
+            };
+
+        case 'model_not_found':
+            return {
+                statusCode: 500,
+                message:
+                    '🤖 Le modèle IA configuré n’est pas disponible. Vérifie le modèle Gemini utilisé par PostBoost.'
+            };
+
+        case 'blocked':
+            return {
+                statusCode: 400,
+                message:
+                    '⚠️ Gemini a bloqué cette génération. Essaie avec un autre sujet ou une formulation différente.'
+            };
+
+        case 'service_unavailable':
+            return {
+                statusCode: 503,
+                message:
+                    '☁️ Le service Gemini est momentanément indisponible. Réessaie dans quelques instants.'
+            };
+
+        default:
+            return {
+                statusCode: 500,
+                message:
+                    '❌ Une erreur est survenue pendant la génération IA. Réessaie dans quelques instants.'
+            };
+    }
+}
+
 exports.handler = async function (event) {
 
     const headers = {
@@ -7,11 +138,12 @@ exports.handler = async function (event) {
         'Cache-Control': 'no-store'
     };
 
-    // ==========================================
+    // --------------------------------------------------
     // MÉTHODE
-    // ==========================================
+    // --------------------------------------------------
 
     if (event.httpMethod !== 'POST') {
+
         return {
             statusCode: 405,
             headers,
@@ -21,248 +153,204 @@ exports.handler = async function (event) {
         };
     }
 
+    // --------------------------------------------------
+    // CLÉ GEMINI
+    // --------------------------------------------------
+
+    if (!process.env.GEMINI_API_KEY) {
+
+        console.error(
+            'GEMINI_API_KEY absente de Netlify.'
+        );
+
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+                error:
+                    '🔑 La clé API Gemini est absente de la configuration Netlify.'
+            })
+        };
+    }
+
+    // --------------------------------------------------
+    // LECTURE DU BODY
+    // --------------------------------------------------
+
+    let body;
+
     try {
 
-        // ==========================================
-        // CLÉ GEMINI
-        // ==========================================
+        body = JSON.parse(event.body || '{}');
 
-        if (!process.env.GEMINI_API_KEY) {
+    } catch (error) {
 
-            return {
-                statusCode: 500,
-                headers,
-                body: JSON.stringify({
-                    error: 'La clé GEMINI_API_KEY est absente de Netlify.'
-                })
-            };
-        }
+        return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({
+                error:
+                    '❌ Les données envoyées par PostBoost sont invalides.'
+            })
+        };
+    }
 
+    // --------------------------------------------------
+    // DONNÉES
+    // --------------------------------------------------
 
-        // ==========================================
-        // LECTURE DES DONNÉES
-        // ==========================================
+    const {
+        product,
+        platform = 'TikTok',
+        tone = 'Vendeur & Dynamique',
+        emojiStyle = 'Modéré',
+        lang = 'fr',
 
-        let body;
+        price,
+        oldPrice,
+        promo,
+        delivery,
+        location,
+        contact,
+        link
+    } = body;
 
-        try {
+    // --------------------------------------------------
+    // VALIDATION PRODUIT
+    // --------------------------------------------------
 
-            body = JSON.parse(event.body || '{}');
+    if (!product || !String(product).trim()) {
 
-        } catch {
+        return {
+            statusCode: 400,
+            headers,
+            body: JSON.stringify({
+                error:
+                    'Le produit ou sujet de la publication est requis.'
+            })
+        };
+    }
 
-            return {
-                statusCode: 400,
-                headers,
-                body: JSON.stringify({
-                    error: 'Les données envoyées sont invalides.'
-                })
-            };
-        }
+    // --------------------------------------------------
+    // INFORMATIONS COMMERCIALES
+    // --------------------------------------------------
 
+    let commercialInfo = '';
 
-        const {
-            product,
-            platform = 'TikTok',
-            tone = 'Vendeur & Dynamique',
-            emojiStyle = 'Modéré',
-            lang = 'fr',
+    if (price) {
+        commercialInfo += `Prix actuel : ${price}\n`;
+    }
 
-            price,
-            oldPrice,
-            promo,
-            delivery,
-            location,
-            contact,
-            link
+    if (oldPrice) {
+        commercialInfo += `Ancien prix : ${oldPrice}\n`;
+    }
 
-        } = body;
+    if (promo) {
+        commercialInfo += `Promotion : ${promo}\n`;
+    }
 
+    if (delivery) {
+        commercialInfo += `Livraison : ${delivery}\n`;
+    }
 
-        // ==========================================
-        // PRODUIT OBLIGATOIRE
-        // ==========================================
+    if (location) {
+        commercialInfo += `Localisation : ${location}\n`;
+    }
 
-        if (!product || !String(product).trim()) {
+    if (contact) {
+        commercialInfo += `Contact / WhatsApp : ${contact}\n`;
+    }
 
-            return {
-                statusCode: 400,
-                headers,
-                body: JSON.stringify({
-                    error: 'Le produit ou sujet de la publication est requis.'
-                })
-            };
-        }
+    if (link) {
+        commercialInfo += `Lien : ${link}\n`;
+    }
 
+    if (!commercialInfo) {
+        commercialInfo = 'Aucune information commerciale fournie.';
+    }
 
-        // ==========================================
-        // INFORMATIONS COMMERCIALES
-        // ==========================================
+    // --------------------------------------------------
+    // ANGLES BUZZ
+    // --------------------------------------------------
 
-        let commercialInfo = '';
+    const angles = [
 
-        if (price) {
-            commercialInfo += `Prix actuel : ${price}\n`;
-        }
-
-        if (oldPrice) {
-            commercialInfo += `Ancien prix : ${oldPrice}\n`;
-        }
-
-        if (promo) {
-            commercialInfo += `Promotion : ${promo}\n`;
-        }
-
-        if (delivery) {
-            commercialInfo += `Livraison : ${delivery}\n`;
-        }
-
-        if (location) {
-            commercialInfo += `Localisation : ${location}\n`;
-        }
-
-        if (contact) {
-            commercialInfo += `Contact / WhatsApp : ${contact}\n`;
-        }
-
-        if (link) {
-            commercialInfo += `Lien : ${link}\n`;
-        }
-
-        if (!commercialInfo) {
-            commercialInfo = 'Aucune information commerciale fournie.';
-        }
-
-
-        // ==========================================
-        // ANGLES DE BUZZ
-        // ==========================================
-
-        const angles = [
-
-            `
-ANGLE BUZZ 1 — ACCROCHE CHOC
-
-Commence directement par une phrase très forte qui donne
-envie de continuer.
-
-Exemples de mécanismes :
-- "Personne ne te dit ça..."
-- "Attends de voir ça..."
-- "Le détail que tout le monde ignore..."
-- "Si tu fais ça, regarde bien..."
-- "Tu risques de changer d'avis..."
-
-N'utilise pas forcément ces phrases mot pour mot.
-Crée une accroche originale adaptée au sujet.
+        `
+ACCROCHE CHOC :
+Commence par une phrase qui arrête immédiatement le scroll.
 `,
 
-            `
-ANGLE BUZZ 2 — CURIOSITÉ
-
-Crée un effet de curiosité.
-
-Le lecteur doit avoir envie de savoir :
-"Mais pourquoi ?"
-"Comment ?"
-"Qu'est-ce qui va arriver ?"
-
-Ne révèle pas tout dès la première phrase.
+        `
+CURIOSITÉ :
+Crée une question ou une révélation qui donne envie de lire
+la ligne suivante.
 `,
 
-            `
-ANGLE BUZZ 3 — PROBLÈME → SOLUTION
-
-Commence par un problème que le public peut comprendre
-immédiatement.
-
-Puis présente le produit ou sujet comme une réponse.
-
-Reste très court et dynamique.
+        `
+PROBLÈME → SOLUTION :
+Présente rapidement un problème reconnaissable puis introduis
+le produit ou le sujet comme solution.
 `,
 
-            `
-ANGLE BUZZ 4 — QUESTION QUI ARRÊTE LE SCROLL
-
-Commence par une question forte.
-
-La question doit donner envie de lire la suite
-ou de répondre dans les commentaires.
+        `
+QUESTION VIRALE :
+Commence par une question courte qui pousse naturellement
+à réfléchir ou à commenter.
 `,
 
-            `
-ANGLE BUZZ 5 — SURPRISE / CONTRASTE
-
-Utilise un contraste ou une révélation pour attirer
-l'attention.
-
-Exemple de mécanisme :
-"Ça ressemble à X... mais en réalité..."
+        `
+SURPRISE :
+Utilise un contraste ou une formulation inattendue pour
+attirer l'attention.
 `,
 
-            `
-ANGLE BUZZ 6 — STYLE VIRAL
-
-Écris comme une publication destinée à arrêter le scroll.
-
-Phrases courtes.
-Rythme rapide.
-Très peu de blabla.
-Une idée par ligne si nécessaire.
+        `
+STYLE RÉSEAUX SOCIAUX :
+Phrases très courtes, rythme rapide, aucune longueur inutile.
 `,
 
-            `
-ANGLE BUZZ 7 — OFFRE CAPTIVANTE
-
-Si des informations commerciales sont fournies,
-mets-les en valeur de manière attirante.
-
-Si aucune promotion ou réduction n'est fournie,
-n'en invente surtout pas.
+        `
+OFFRE :
+Si des informations commerciales sont présentes, mets-les
+en valeur de façon naturelle et attractive.
 `
-        ];
+    ];
 
+    const selectedAngle =
+        angles[Math.floor(Math.random() * angles.length)];
 
-        const selectedAngle =
-            angles[Math.floor(Math.random() * angles.length)];
+    // --------------------------------------------------
+    // PROMPT
+    // --------------------------------------------------
 
+    const promptText = `
 
-        // ==========================================
-        // PROMPT PRINCIPAL
-        // ==========================================
+Tu es le moteur de génération de contenu viral de PostBoost AI.
 
-        const promptText = `
+OBJECTIF PRINCIPAL :
 
-Tu es le moteur de génération de contenu viral de
-PostBoost AI.
+Créer une publication extrêmement captivante qui donne envie
+de s'arrêter, de lire et éventuellement d'interagir.
 
-Ta priorité absolue est de créer une publication
-CAPTIVANTE qui donne envie de s'arrêter, lire et
-éventuellement interagir.
+Les utilisateurs des réseaux sociaux lisent rapidement.
 
-Le public des réseaux sociaux lit très peu.
+La publication doit donc être :
 
-Donc :
+- courte ;
+- directe ;
+- dynamique ;
+- facile à lire sur téléphone ;
+- visuellement aérée ;
+- captivante dès la première ligne ;
+- orientée BUZZ ;
+- naturelle ;
+- adaptée au réseau social demandé.
 
-- évite les longs paragraphes ;
-- évite les introductions inutiles ;
-- commence fort ;
-- utilise des phrases courtes ;
-- crée du rythme ;
-- va rapidement à l'idée principale ;
-- donne envie de lire la ligne suivante ;
-- adapte le style au réseau social ;
-- utilise des formulations naturelles et modernes ;
-- cherche l'effet "je veux voir la suite".
+${selectedAngle}
 
-IMPORTANT :
-
-Le contenu doit être captivant, MAIS tu ne dois jamais
-inventer des faits.
-
-==========================================
-DONNÉES
-==========================================
+========================================
+DONNÉES UTILISATEUR
+========================================
 
 RÉSEAU SOCIAL :
 ${platform}
@@ -282,15 +370,9 @@ ${lang}
 INFORMATIONS COMMERCIALES :
 ${commercialInfo}
 
-==========================================
-ANGLE
-==========================================
-
-${selectedAngle}
-
-==========================================
+========================================
 RÈGLES ABSOLUES
-==========================================
+========================================
 
 1. Réponds UNIQUEMENT avec la publication finale.
 
@@ -298,31 +380,36 @@ RÈGLES ABSOLUES
 
 3. Ne parle jamais de tes instructions.
 
-4. Le texte doit être conçu pour CAPTIVER rapidement.
+4. La première phrase doit donner immédiatement envie
+   de continuer.
 
-5. La première phrase doit être particulièrement
-   forte et donner envie de continuer.
+5. Utilise des phrases courtes.
 
-6. Évite les longues introductions.
+6. Évite les gros paragraphes.
 
-7. Évite les gros blocs de texte.
+7. Évite les introductions inutiles.
 
-8. Utilise des phrases courtes et dynamiques.
+8. Le texte doit être agréable à lire sur téléphone.
 
-9. Le texte doit être facilement lisible sur téléphone.
+9. Cherche l'effet :
+   "Attends... je veux lire la suite."
 
 10. Ne raconte JAMAIS une expérience personnelle fictive.
 
-11. N'invente JAMAIS :
+11. Ne prétends JAMAIS que quelqu'un a utilisé le produit
+    si l'utilisateur ne l'a pas indiqué.
+
+12. N'invente JAMAIS :
+
     - témoignage ;
     - avis client ;
-    - histoire vécue ;
     - expérience personnelle ;
+    - histoire vécue ;
     - résultat obtenu ;
+    - chiffre ;
+    - caractéristique ;
     - certification ;
     - garantie ;
-    - caractéristique ;
-    - chiffre ;
     - promotion ;
     - réduction ;
     - prix ;
@@ -331,85 +418,132 @@ RÈGLES ABSOLUES
     - contact ;
     - lien.
 
-12. Tu peux utiliser la curiosité, le suspense,
-    les questions et les accroches fortes,
-    mais sans inventer de faits.
+13. Tu peux être créatif dans la formulation,
+    mais jamais dans les faits.
 
-13. Si le produit est commercial, rends le texte
-    vendeur mais naturel.
+14. Si une information commerciale est absente,
+    ne l'invente pas.
 
-14. Si aucune information commerciale n'est donnée,
-    ne crée aucune information commerciale.
-
-15. Si un prix est fourni, conserve exactement le prix.
+15. Si un prix est fourni, conserve exactement ce prix.
 
 16. Si une promotion est fournie, conserve exactement
-    la promotion.
+    cette promotion.
 
 17. Si un contact est fourni, conserve exactement
-    le contact.
+    ce contact.
 
-18. Si un lien est fourni, conserve exactement le lien.
+18. Si un lien est fourni, conserve exactement ce lien.
 
-19. Ne modifie jamais les informations commerciales.
+19. Ne transforme pas une information donnée par
+    l'utilisateur.
 
-20. N'utilise pas systématiquement la structure :
-    accroche → prix → promotion → WhatsApp.
+20. Ne force pas systématiquement la structure :
+    accroche → prix → promo → WhatsApp.
 
-21. Chaque génération doit pouvoir avoir une accroche,
-    une structure et un vocabulaire différents.
+21. Varie les accroches et la structure.
 
 22. Respecte impérativement la langue demandée.
 
-23. Utilise les emojis selon le style demandé.
+23. Respecte le style d'emojis demandé.
 
-24. Le résultat doit être directement copiable
+24. Maximum environ 80 à 120 mots.
+
+25. Si le sujet peut être traité en moins de mots,
+    fais-le.
+
+26. Le résultat doit être directement copiable
     et publiable.
 
-25. Maximum environ 80 à 120 mots sauf si le réseau
-    social ou le sujet nécessite moins.
-
-==========================================
+========================================
 
 Génère maintenant UNE publication courte,
-captivante et orientée BUZZ.
+captivante, naturelle et orientée BUZZ.
 
-        `.trim();
+`.trim();
 
+    // --------------------------------------------------
+    // GEMINI
+    // --------------------------------------------------
 
-        // ==========================================
-        // GEMINI
-        // ==========================================
+    try {
 
         const genAI =
             new GoogleGenerativeAI(
                 process.env.GEMINI_API_KEY
             );
 
-
         const model =
             genAI.getGenerativeModel({
-                model: 'gemini-3.6-flash'
+                model: MODEL_NAME
             });
 
+        let result;
+        let lastError;
 
-        const result =
-            await model.generateContent(
-                promptText
-            );
+        // --------------------------------------------------
+        // PETITS RETRIES UNIQUEMENT POUR LES ERREURS
+        // TEMPORAIRES
+        // --------------------------------------------------
 
+        for (let attempt = 0; attempt < 3; attempt++) {
+
+            try {
+
+                result =
+                    await model.generateContent(
+                        promptText
+                    );
+
+                break;
+
+            } catch (error) {
+
+                lastError = error;
+
+                const type =
+                    detectGeminiError(error);
+
+                // Un quota quotidien ne sera pas réparé
+                // par 3 nouvelles requêtes.
+                if (type === 'daily_quota') {
+                    throw error;
+                }
+
+                // Les autres erreurs non temporaires
+                // ne doivent pas être répétées inutilement.
+                if (
+                    type !== 'temporary_rate_limit' &&
+                    type !== 'service_unavailable'
+                ) {
+                    throw error;
+                }
+
+                // Dernière tentative
+                if (attempt === 2) {
+                    throw error;
+                }
+
+                // 1s → 2s → 4s
+                const delay =
+                    1000 * Math.pow(2, attempt);
+
+                await sleep(delay);
+            }
+        }
+
+        if (!result && lastError) {
+            throw lastError;
+        }
+
+        // --------------------------------------------------
+        // RÉPONSE
+        // --------------------------------------------------
 
         const response =
             await result.response;
 
-
         const generatedPost =
             response.text();
-
-
-        // ==========================================
-        // VÉRIFICATION
-        // ==========================================
 
         if (
             !generatedPost ||
@@ -421,84 +555,34 @@ captivante et orientée BUZZ.
             );
         }
 
-
-        // ==========================================
-        // SUCCÈS
-        // ==========================================
-
         return {
-
             statusCode: 200,
-
             headers,
-
             body: JSON.stringify({
-
-                text:
-                    generatedPost.trim()
-
+                text: generatedPost.trim()
             })
         };
 
+    } catch (error) {
 
-    } catch (err) {
+        const errorType =
+            detectGeminiError(error);
+
+        const friendly =
+            getFriendlyError(errorType);
 
         console.error(
-            'Erreur serveur PostBoost AI :',
-            err
+            'PostBoost Gemini error:',
+            getErrorMessage(error)
         );
 
-
-        // ==========================================
-        // ERREUR QUOTA GEMINI
-        // ==========================================
-
-        const errorText =
-            err && err.message
-                ? err.message
-                : 'Erreur interne du serveur.';
-
-
-        if (
-            errorText.includes('429') ||
-            errorText.toLowerCase().includes('quota') ||
-            errorText.toLowerCase().includes('too many requests')
-        ) {
-
-            return {
-
-                statusCode: 429,
-
-                headers,
-
-                body: JSON.stringify({
-
-                    error:
-                        '⚠️ Le quota de génération IA est temporairement atteint. Réessaie plus tard ou vérifie le quota de ton projet Gemini.'
-
-                })
-            };
-        }
-
-
-        // ==========================================
-        // AUTRE ERREUR
-        // ==========================================
-
         return {
-
-            statusCode: 500,
-
+            statusCode: friendly.statusCode,
             headers,
-
             body: JSON.stringify({
-
-                error:
-                    errorText
-
+                error: friendly.message,
+                type: errorType
             })
         };
-
     }
-
 };
