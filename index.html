@@ -193,11 +193,11 @@
                 <h4 class="text-xs font-bold text-purple-400 uppercase" data-i18n="missions_title">🎯 Missions Quotidiennes</h4>
                 <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg text-xs">
                     <span class="text-slate-300" data-i18n="mission_1">Génère plus de 3 posts (chaque jour) → <b>+20 crédits</b></span>
-                    <span class="bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800" data-i18n="in_progress">En cours</span>
+                    <span id="mission1Status" class="bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800" data-i18n="in_progress">En cours</span>
                 </div>
                 <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg text-xs">
                     <span class="text-slate-300" data-i18n="mission_2">Connexion 7 jours de suite → <b>+250 crédits</b></span>
-                    <span class="bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800" data-i18n="in_progress">En cours</span>
+                    <span id="mission2Status" class="bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800" data-i18n="in_progress">En cours</span>
                 </div>
             </div>
         </div>
@@ -266,6 +266,7 @@
                 mission_1: "Génère plus de 3 posts (chaque jour) → <b>+20 crédits</b>",
                 mission_2: "Connexion 7 jours de suite → <b>+250 crédits</b>",
                 in_progress: "En cours",
+                completed: "Terminé 🎉",
                 account_title: "Mon Compte",
                 account_sub: "Suivez votre solde et l'historique de votre profil.",
                 acc_balance: "📊 Solde actuel :",
@@ -311,6 +312,7 @@
                 mission_1: "Generate over 3 posts (daily) → <b>+20 credits</b>",
                 mission_2: "Log in 7 days in a row → <b>+250 credits</b>",
                 in_progress: "In progress",
+                completed: "Completed 🎉",
                 account_title: "My Account",
                 account_sub: "Track your balance and profile history.",
                 acc_balance: "📊 Current balance:",
@@ -356,6 +358,7 @@
                 mission_1: "每天生成3个以上帖子 → <b>+20 积分</b>",
                 mission_2: "连续登录 7 天 → <b>+250 积分</b>",
                 in_progress: "进行中",
+                completed: "已完成 🎉",
                 account_title: "我的账户",
                 account_sub: "追踪您的余额和个人资料历史记录。",
                 acc_balance: "📊 当前余额：",
@@ -401,6 +404,7 @@
                 mission_1: "Generar más de 3 publicaciones (diarias) → <b>+20 créditos</b>",
                 mission_2: "Conectarse 7 días seguidos → <b>+250 créditos</b>",
                 in_progress: "En curso",
+                completed: "Completado 🎉",
                 account_title: "Mi Cuenta",
                 account_sub: "Sigue tu saldo y el historial de tu perfil.",
                 acc_balance: "📊 Saldo actual:",
@@ -417,7 +421,6 @@
             currentLang = document.getElementById('langSelect').value;
             const t = translations[currentLang];
 
-            // Traduction des éléments avec data-i18n
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (t[key]) {
@@ -425,26 +428,115 @@
                 }
             });
 
-            // Traduction des placeholders
             document.querySelectorAll('[data-placeholder]').forEach(input => {
                 const key = input.getAttribute('data-placeholder');
                 if (t[key]) {
                     input.placeholder = t[key];
                 }
             });
+            updateMissionsUI();
         }
 
         // Gestion locale des crédits
         let userCredits = localStorage.getItem('postboost_credits') ? parseInt(localStorage.getItem('postboost_credits')) : 100;
 
         function updateCreditsDisplay() {
-            document.getElementById('creditDisplay').textContent = userCredits + ' ' + (currentLang === 'fr' ? 'Crédits' : currentLang === 'en' ? 'Credits' : currentLang === 'zh' ? '积分' : 'Créditos');
+            const unit = currentLang === 'fr' ? 'Crédits' : currentLang === 'en' ? 'Credits' : currentLang === 'zh' ? '积分' : 'Créditos';
+            document.getElementById('creditDisplay').textContent = userCredits + ' ' + unit;
             if(document.getElementById('accountCreditDisplay')) {
-                document.getElementById('accountCreditDisplay').textContent = userCredits + ' ' + (currentLang === 'fr' ? 'Crédits' : currentLang === 'en' ? 'Credits' : currentLang === 'zh' ? '积分' : 'Créditos');
+                document.getElementById('accountCreditDisplay').textContent = userCredits + ' ' + unit;
             }
             localStorage.setItem('postboost_credits', userCredits);
         }
         updateCreditsDisplay();
+
+        // LOGIQUE DES MISSIONS QUOTIDIENNES
+        function checkDailyLoginMission() {
+            const today = new Date().toISOString().slice(0, 10);
+            const lastLogin = localStorage.getItem('postboost_last_login');
+            let streak = parseInt(localStorage.getItem('postboost_login_streak') || '0');
+            let rewardClaimed = localStorage.getItem('postboost_streak_reward_' + today) === 'true';
+
+            if (lastLogin !== today) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+                if (lastLogin === yesterdayStr) {
+                    streak += 1;
+                } else if (!lastLogin) {
+                    streak = 1;
+                } else {
+                    streak = 1; // Reset si un jour a été raté
+                }
+                localStorage.setItem('postboost_last_login', today);
+                localStorage.setItem('postboost_login_streak', streak);
+            }
+
+            // Si la série atteint 7 jours et n'a pas encore été récompensée aujourd'hui
+            if (streak >= 7 && !rewardClaimed) {
+                userCredits += 250;
+                localStorage.setItem('postboost_streak_reward_' + today, 'true');
+                localStorage.setItem('postboost_login_streak', 0); // Remise à zéro pour un nouveau cycle
+                updateCreditsDisplay();
+                alert("🔥 Incroyable ! Connexion pendant 7 jours d'affilée ! Tu gagnes 250 crédits bonus !");
+            }
+            updateMissionsUI();
+        }
+
+        function checkGenerationMission() {
+            const today = new Date().toISOString().slice(0, 10);
+            let lastGenDate = localStorage.getItem('postboost_gen_date');
+            let postsToday = parseInt(localStorage.getItem('postboost_posts_today') || '0');
+            let genRewardClaimed = localStorage.getItem('postboost_gen_reward_' + today) === 'true';
+
+            // Réinitialiser le compteur si on change de jour
+            if (lastGenDate !== today) {
+                postsToday = 0;
+                localStorage.setItem('postboost_gen_date', today);
+            }
+
+            postsToday += 1;
+            localStorage.setItem('postboost_posts_today', postsToday);
+
+            // Mission 3 posts = 20 crédits
+            if (postsToday >= 3 && !genRewardClaimed) {
+                userCredits += 20;
+                localStorage.setItem('postboost_gen_reward_' + today, 'true');
+                updateCreditsDisplay();
+                alert("🎉 Bravo ! Mission accomplie : 3 posts générés aujourd'hui ! Tu gagnes 20 crédits.");
+            }
+            updateMissionsUI();
+        }
+
+        function updateMissionsUI() {
+            const t = translations[currentLang];
+            const today = new Date().toISOString().slice(0, 10);
+            
+            // Mission 1 UI
+            const genRewardClaimed = localStorage.getItem('postboost_gen_reward_' + today) === 'true';
+            const m1El = document.getElementById('mission1Status');
+            if (m1El) {
+                m1El.textContent = genRewardClaimed ? t.completed : t.in_progress;
+                m1El.className = genRewardClaimed 
+                    ? "bg-emerald-900/40 text-emerald-300 text-[10px] px-2 py-1 rounded font-bold border border-emerald-800" 
+                    : "bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800";
+            }
+
+            // Mission 2 UI
+            const streakRewardClaimed = localStorage.getItem('postboost_streak_reward_' + today) === 'true';
+            const streak = parseInt(localStorage.getItem('postboost_login_streak') || '0');
+            const m2El = document.getElementById('mission2Status');
+            if (m2El) {
+                m2El.textContent = streakRewardClaimed ? t.completed : `${streak}/7 j`;
+                m2El.className = streakRewardClaimed 
+                    ? "bg-emerald-900/40 text-emerald-300 text-[10px] px-2 py-1 rounded font-bold border border-emerald-800" 
+                    : "bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800";
+            }
+        }
+
+        // Lancement de la vérification de connexion au chargement
+        checkDailyLoginMission();
 
         // Navigation entre les onglets
         function switchTab(tabName) {
@@ -482,7 +574,7 @@
                 platform: document.getElementById('platform').value,
                 tone: document.getElementById('tone').value,
                 emojiStyle: document.getElementById('emojiStyle').value,
-                lang: currentLang, // Envoi de la langue exacte choisie à l'IA
+                lang: currentLang,
                 price: document.getElementById('price').value,
                 oldPrice: document.getElementById('oldPrice').value,
                 promo: document.getElementById('promo').value,
@@ -503,7 +595,6 @@
                     body: JSON.stringify(payload)
                 });
 
-                // Essaye de parser le JSON, si la réponse échoue, récupère le texte brut
                 let data;
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.indexOf("application/json") !== -1) {
@@ -520,11 +611,14 @@
                 resultText.textContent = data.text;
                 resultContainer.classList.remove('hidden');
 
+                // Déduction des 5 crédits de génération
                 userCredits -= 5;
                 updateCreditsDisplay();
 
+                // Validation de la progression pour la mission des 3 posts
+                checkGenerationMission();
+
             } catch (err) {
-                // MODIFICATION : Affiche l'erreur précise au lieu de juste "Erreur"
                 alert('Erreur détaillée : ' + err.message);
                 console.error("Détail de l'erreur :", err);
             } finally {
