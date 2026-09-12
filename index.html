@@ -24,7 +24,7 @@
             </div>
         </div>
 
-        <!-- Navigation par onglets d'origine -->
+        <!-- Navigation par onglets -->
         <div class="grid grid-cols-4 gap-1 bg-slate-950 p-1 rounded-xl mb-6 text-xs font-semibold text-slate-400 text-center">
             <button type="button" onclick="switchTab('creer')" id="btn-creer" class="bg-purple-600 text-white py-2 rounded-lg shadow transition">✍️ Créer</button>
             <button type="button" onclick="switchTab('booster')" id="btn-booster" class="py-2 hover:text-slate-200 transition">🚀 Booster</button>
@@ -36,7 +36,7 @@
         <!-- ONGLET : CRÉER -->
         <!-- ========================================== -->
         <div id="tab-content-creer" class="space-y-4">
-            <div class="text-center mb-6">
+            <div class="text-center mb-4">
                 <h2 class="text-xl font-bold text-slate-100">PostBoost AI</h2>
                 <p class="text-xs text-slate-400 mt-1">Crée du contenu qui attire l'attention en quelques secondes.</p>
             </div>
@@ -89,7 +89,18 @@
                     </div>
                 </div>
 
-                <!-- NOUVEAU BLOC : INFOS COMMERCIALES FACULTATIVES -->
+                <!-- OPTION : STYLE D'EMOJIS -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">😊 Style d’emojis :</label>
+                    <select id="emojiStyle" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-purple-500 transition">
+                        <option value="Très dynamique — beaucoup d’emojis">🔥 Très dynamique — beaucoup d’emojis</option>
+                        <option value="Modéré — quelques emojis bien placés" selected>✨ Modéré — quelques emojis bien placés</option>
+                        <option value="Professionnel — très peu d’emojis">🧑‍💼 Professionnel — très peu d’emojis</option>
+                        <option value="Sans emojis">🚫 Sans emojis</option>
+                    </select>
+                </div>
+
+                <!-- BLOC : INFOS COMMERCIALES FACULTATIVES -->
                 <div class="bg-slate-950/60 border border-slate-800/80 rounded-xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-xs font-bold text-purple-400 uppercase tracking-wider">💰 Infos Commerciales (Facultatif)</span>
@@ -131,14 +142,27 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- ONGLET : BOOSTER -->
+        <!-- ONGLET : BOOSTER (Mis à jour style image) -->
         <!-- ========================================== -->
-        <div id="tab-content-booster" class="hidden text-center py-8 space-y-3">
-            <span class="text-3xl">🚀</span>
-            <h3 class="text-base font-bold text-slate-200">Booster Publicitaire</h3>
-            <p class="text-xs text-slate-400">Automatisez et diffusez vos campagnes publicitaires directement depuis l'application.</p>
-            <div class="p-4 bg-slate-950 border border-slate-800 rounded-xl text-xs text-slate-400">
-                Bientôt disponible dans la prochaine mise à jour de la V1.
+        <div id="tab-content-booster" class="hidden space-y-4 py-2">
+            <div class="text-center space-y-1">
+                <span class="text-3xl">🚀</span>
+                <h3 class="text-base font-bold text-slate-200">Booster ma publication</h3>
+                <p class="text-xs text-slate-400">Diffusez vos contenus auprès d'une audience plus large.</p>
+            </div>
+
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-center space-y-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 bg-amber-500/10 text-amber-400 rounded-full text-xl mb-1 border border-amber-500/20">
+                    🚧
+                </div>
+                <h4 class="text-sm font-bold text-slate-200">Bientôt disponible</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Cette fonctionnalité de ciblage publicitaire automatisé arrivera dans la prochaine mise à jour de PostBoost AI.
+                </p>
+                <button onclick="alert('Merci ! Vous serez averti dès le lancement du Booster.')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-3 px-4 rounded-xl shadow transition flex items-center justify-center space-x-2">
+                    <span>🔔</span>
+                    <span>Être informé du lancement</span>
+                </button>
             </div>
         </div>
 
@@ -163,18 +187,18 @@
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-purple-400 uppercase">🎯 Missions Quotidiennes</h4>
                 <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg text-xs">
-                    <span class="text-slate-300">Génère 3 posts aujourd'hui → <b>+50 crédits</b></span>
-                    <span class="bg-emerald-900/60 text-emerald-400 text-[10px] px-2 py-1 rounded font-bold">Validé</span>
+                    <span class="text-slate-300">Génère plus de 3 posts (chaque jour) → <b>+20 crédits</b></span>
+                    <span class="bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800">En cours</span>
                 </div>
                 <div class="flex items-center justify-between bg-slate-900 p-2.5 rounded-lg text-xs">
-                    <span class="text-slate-300">Connexion quotidienne → <b>+300 crédits</b></span>
-                    <span class="bg-emerald-900/60 text-emerald-400 text-[10px] px-2 py-1 rounded font-bold">Validé</span>
+                    <span class="text-slate-300">Connexion 7 jours de suite → <b>+250 crédits</b></span>
+                    <span class="bg-purple-900/40 text-purple-300 text-[10px] px-2 py-1 rounded font-bold border border-purple-800">En cours</span>
                 </div>
             </div>
         </div>
 
         <!-- ========================================== -->
-        <!-- ONGLET : COMPTE -->
+        <!-- ONGLET : COMPTE (Épuré, sans sécurité API) -->
         <!-- ========================================== -->
         <div id="tab-content-compte" class="hidden space-y-4 py-2">
             <div class="text-center space-y-1">
@@ -188,13 +212,9 @@
                     <span class="text-slate-400">📊 Solde actuel :</span>
                     <span id="accountCreditDisplay" class="font-bold text-purple-400">100 Crédits</span>
                 </div>
-                <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <div class="flex justify-between items-center">
                     <span class="text-slate-400">📱 Statut du compte :</span>
                     <span class="font-bold text-emerald-400">Actif (Version Gratuite V1)</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-400">🛡️ Sécurité API :</span>
-                    <span class="font-bold text-slate-200">Intégrée (Anti-hallucination)</span>
                 </div>
             </div>
         </div>
@@ -241,7 +261,7 @@
             e.preventDefault();
 
             if (userCredits < 5) {
-                alert("Crédits insuffisants ! Parrainez des amis ou revenez demain.");
+                alert("Crédits insuffisants ! Parrainez des amis ou accomplissez vos missions quotidiennes.");
                 return;
             }
 
@@ -249,6 +269,7 @@
                 product: document.getElementById('product').value,
                 platform: document.getElementById('platform').value,
                 tone: document.getElementById('tone').value,
+                emojiStyle: document.getElementById('emojiStyle').value,
                 lang: document.getElementById('lang').value,
                 price: document.getElementById('price').value,
                 oldPrice: document.getElementById('oldPrice').value,
